@@ -1,0 +1,95 @@
+package components;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Class for ADD/SUB unit collection belonging to the processor
+ * @author David
+ *
+ */
+public class Adders {
+
+	
+	private static List<AddUnit> addUnits;
+	public static int addUnitNumber;
+
+
+	
+	/**
+	 * Constructor for ADD/SUB unit collection
+	 * @param unitNumber	how many units?
+	 */
+	public Adders(int unitNumber){
+		
+		addUnitNumber = unitNumber;
+		
+	}
+	
+	/**
+	 * Checks if all ADD/SUB units are busy
+	 * @return true if all units are busy
+	 */
+	public boolean isFullyBusy(){
+		return (freeUnitIndex() == -1) ? true : false;
+	}
+	
+	/**
+	 * Go over all ADD/SUB units and return index of a free unit if it exists.
+	 * @return index of free ADD/SUB unit or -1 is all are busy
+	 */
+	public static int freeUnitIndex(){
+		
+		for(int i =0; i< addUnitNumber; i++){
+			if (!addUnits.get(i).isBusy(Processor.PC))
+				return i;
+		}
+		return -1;
+		
+	}
+	
+	/**
+	 * This method initializes all ADD/SUB units for the processor. 
+	 * 
+	 * @param addUnitNumber	number of units to construct
+	 * @param addUnitDelay	number of cycles the units takes to finish execution
+	 * @return ArrayList of ADD/SUB units
+	 */
+	private List<AddUnit> createAddUnits() {
+		
+		ArrayList<AddUnit> returnMe = new ArrayList<AddUnit>();
+		for (int i = 0; i < addUnitNumber; i++){
+			returnMe.add(new AddUnit());
+		}
+		
+		return returnMe;
+	}
+
+
+	
+	/**
+	 * search reservation stations for commands that can begin execution
+	 */
+	public static void attemptPushToUnit() {
+		
+		// find instruction that is ready to be pushed
+		int freeInstructionIndex = AddUnit.reservationStations.isReadyIndex();	// index of reservation station that we want
+		if (freeInstructionIndex == -1)
+			return; // nothing to push, no commands are ready
+		
+		// find unit that is capable accepting new instruction for execution
+		int freeUnitIndex = freeUnitIndex();
+		if (freeUnitIndex == -1)
+			return; // no free units available for execution work
+		
+		// We have an instruction and a unit willing to run it
+		// Mark this CC as the CC that this command started execution
+		Instruction inst = AddUnit.reservationStations.instructions[freeInstructionIndex];
+		if (inst.getThread() == Processor.THREAD_0){
+			
+			InstructionQueue.exeCC_0[inst.getqLocation()] = Processor.PC;
+			addUnits.get(freeUnitIndex).execute(freeInstructionIndex);
+		}	
+		
+	}
+}

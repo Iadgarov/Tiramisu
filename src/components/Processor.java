@@ -14,20 +14,15 @@ public class Processor {
 	
 	// Constants:
 	public final static int MEMORY_SIZE = 65536;
-	
+	public final static int THREAD_0	= 0;
+	public final static int THREAD_1	= 1;
 	
 	// Attributes:
-	private static Queue<Instruction> instructionQ;
+	public static InstructionQueue instructionQ;	// instructions
 	
-	private static List<AddUnit> addUnits;
-	public static int addUnitNumber;
-	public static int addReservationStationNumber;
-	public static int addUnitDelay;
+	public static Adders addUnits;
 	
-	private static List<MultUnit> multUnits;
-	public static int multUnitNumber;
-	public static int multResevationStationNumber;
-	public static int multUnitDelay;
+	public static Multers multUnits;
 	
 	private static List<StoreBuffer> storeBuffers;
 	public static int storeBufferNumber;
@@ -35,73 +30,58 @@ public class Processor {
 	private static List<LoadBuffer> loadBuffer;
 	public static int loadBufferNumber;
 	
-	private static Register registers[] = new Register[16];
+	public static RegisterCollection registers_0 = new RegisterCollection(THREAD_0);
+	public static RegisterCollection registers_1 = new RegisterCollection(THREAD_1);
 	
-	private static int PC = 0; // start counter at 0
+	public static int PC = 0; // start counter at 0
 
 	/**
-	 * 
-	 * @param instructionQ	the program we want to run, broken up into indivigual instructions.
-	 * @param addUnitNumber	number of ADD/SUB processing units
-	 * @param multUnitNumber	number of MUL/DIV processing units
-	 * @param storeBufferNumber	number of Store Buffers
-	 * @param loadBufferNumber	number of Load Buffers
+	 * Constructor for processor class
+	 * @param instructionQ_0	Instructions for first thread
+	 * @param instructionQ_1	Instructions for second thread
+	 * @param addUnitNumber		Number of ADD/SUB units
+	 * @param addUnitDelay		ADD/SUB unit calculation time in CC's
+	 * @param multUnitNumber	Number of MULT/DIV units
+	 * @param multUnitDelay		MULT/DIV unit calculation time in CC's
+	 * @param storeBufferNumber	Number of store buffers
+	 * @param loadBufferNumber	Number of load buffers
+	 * @param addReservationStationNumber	Number of reservation stations for ADD/SUB units
+	 * @param multReservationStationNumber	Number of reservation stations for MULT/DIV units
 	 */
-	public Processor(Queue<Instruction> instructionQ, int addUnitNumber, int addUnitDelay, int multUnitNumber,
-			int multUnitDelay, int storeBufferNumber, int loadBufferNumber, int addReservationStationNumber,
-			int multReservationStationNumber) {
+	public Processor(Queue<Instruction> instructionQ_0, Queue<Instruction> instructionQ_1, int addUnitNumber, int addUnitDelay,
+			int multUnitNumber, int multUnitDelay, int storeBufferNumber, int loadBufferNumber, 
+			int addReservationStationNumber, int multReservationStationNumber) {
 		
 		super();
 		
-		Processor.instructionQ = instructionQ;
-		Processor.addUnitNumber = addUnitNumber;
-		Processor.multUnitNumber = multUnitNumber;
+		Processor.instructionQ = new InstructionQueue( instructionQ_0, instructionQ_1);
+
 		Processor.storeBufferNumber = storeBufferNumber;
 		Processor.loadBufferNumber = loadBufferNumber;
-		Processor.addReservationStationNumber = addReservationStationNumber;
-		Processor.multResevationStationNumber = multReservationStationNumber;
-		Processor.addUnitDelay = addUnitDelay;
-		Processor.multUnitDelay = multUnitDelay;
+
 		
-		addUnits = createAddUnits();
-		multUnits = createMulUnits();
+		AddUnit.executionDelay = addUnitDelay;
+		AddUnit.reservationStationNumber = addReservationStationNumber;
+		addUnits = new Adders(addUnitNumber);
+		
+		MultUnit.executionDelay = multUnitDelay;
+		MultUnit.reservationStationNumber = multReservationStationNumber;
+		multUnits = new Multers(multUnitNumber);
 		
 		
 	}
 
-	/**
-	 * This method initializes all the MUL/DIV units for the processor. 
-	 * 
-	 * @param multUnitNumber	number of units to construct
-	 * @param multUnitDelay		number of cycles it takes for this unit to complete execution
-	 * @return	ArrayList of MUL/DIV units
-	 */
-	private List<MultUnit> createMulUnits() {
 
-
-		ArrayList<MultUnit> returnMe = new ArrayList<MultUnit>();
-		for (int i = 0; i < Processor.addUnitNumber; i++){
-			returnMe.add(new MultUnit());
+	// experimenting!!
+	private void instructionQing(){
+		
+		// so long as there are still instructions to do, keep going.
+		while (!instructionQ.isEmpty()){
+			
+			instructionQ.attemptIssue();	// issue any new commands if possible
+			Adders.attemptPushToUnit(); // try to pass a command from the station to the units
+			Multers.attemptPushToUnit();
 		}
-		
-		return returnMe;
-	}
-
-	/**
-	 * This method initializes all ADD/SUB units for the processor. 
-	 * 
-	 * @param addUnitNumber	number of units to construct
-	 * @param addUnitDelay	number of cycles the units takes to finish execution
-	 * @return ArrayList of ADD/SUB units
-	 */
-	private List<AddUnit> createAddUnits() {
-		
-		ArrayList<AddUnit> returnMe = new ArrayList<AddUnit>();
-		for (int i = 0; i < Processor.addUnitNumber; i++){
-			returnMe.add(new AddUnit());
-		}
-		
-		return returnMe;
 	}
 	
 	
