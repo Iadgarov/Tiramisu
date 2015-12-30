@@ -8,7 +8,13 @@ public class Multers {
 	private static List<MultUnit> multUnits;
 	public static int multUnitNumber;
 
+	/**
+	 * Construct the list of MULT/DIV units. 
+	 * @param multUnitNumber	number of said units
+	 */
 	public Multers(int multUnitNumber){
+		
+		Multers.multUnitNumber = multUnitNumber;
 		multUnits = createMulUnits();
 	}
 	
@@ -22,13 +28,13 @@ public class Multers {
 	}
 	
 	/**
-	 * Go over all ADD/SUB units and return index of a free unit if it exists.
+	 * Go over all MULT/DIV units and return index of a free unit if it exists.
 	 * @return index of free MULT/DIV unit or -1 is all are busy
 	 */
 	public static int freeUnitIndex(){
 		
 		for(int i =0; i< multUnitNumber; i++){
-			if (!multUnits.get(i).isBusy(Processor.PC))
+			if (!multUnits.get(i).isBusy(Processor.CC))
 				return i;
 		}
 		return -1;
@@ -56,9 +62,20 @@ public class Multers {
 		Instruction inst = AddUnit.reservationStations.instructions[freeInstructionIndex];
 		if (inst.getThread() == Processor.THREAD_0){
 			
-			InstructionQueue.exeCC_0[inst.getqLocation()] = Processor.PC;
-			multUnits.get(freeUnitIndex).execute(freeInstructionIndex);
+			if (InstructionQueue.issueCC_0[inst.getqLocation()] >= Processor.CC)
+				return; // it was just issued, wait another cycle at least
+			
+			InstructionQueue.exeCC_0[inst.getqLocation()] = Processor.CC;
 		}	
+		else if (inst.getThread() == Processor.THREAD_1){
+			
+			if (InstructionQueue.issueCC_1[inst.getqLocation()] >= Processor.CC)
+				return; // it was just issued, wait another cycle at least
+			
+			InstructionQueue.exeCC_1[inst.getqLocation()] = Processor.CC;
+		}
+		multUnits.get(freeUnitIndex).execute(freeInstructionIndex);
+
 	}
 	
 	

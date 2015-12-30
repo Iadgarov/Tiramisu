@@ -23,7 +23,7 @@ public class Adders {
 	public Adders(int unitNumber){
 		
 		addUnitNumber = unitNumber;
-		
+		addUnits = createAddUnits();
 	}
 	
 	/**
@@ -41,7 +41,7 @@ public class Adders {
 	public static int freeUnitIndex(){
 		
 		for(int i =0; i< addUnitNumber; i++){
-			if (!addUnits.get(i).isBusy(Processor.PC))
+			if (!addUnits.get(i).isBusy(Processor.CC))
 				return i;
 		}
 		return -1;
@@ -87,9 +87,19 @@ public class Adders {
 		Instruction inst = AddUnit.reservationStations.instructions[freeInstructionIndex];
 		if (inst.getThread() == Processor.THREAD_0){
 			
-			InstructionQueue.exeCC_0[inst.getqLocation()] = Processor.PC;
-			addUnits.get(freeUnitIndex).execute(freeInstructionIndex);
-		}	
+			if (InstructionQueue.issueCC_0[inst.getqLocation()] >= Processor.CC)
+				return; // it was just issued, wait another cycle at least
+			
+			InstructionQueue.exeCC_0[inst.getqLocation()] = Processor.CC;
+		}
+		else if (inst.getThread() == Processor.THREAD_1){
+			
+			if (InstructionQueue.issueCC_1[inst.getqLocation()] >= Processor.CC)
+				return; // it was just issued, wait another cycle at least
+			
+			InstructionQueue.exeCC_1[inst.getqLocation()] = Processor.CC;
+		}
+		addUnits.get(freeUnitIndex).execute(freeInstructionIndex);
 		
 	}
 }

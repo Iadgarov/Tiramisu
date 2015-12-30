@@ -1,7 +1,6 @@
 package components;
 
-import java.util.ArrayList;
-import java.util.List;
+
 import java.util.Queue;
 
 /**
@@ -24,16 +23,18 @@ public class Processor {
 	
 	public static Multers multUnits;
 	
-	private static List<StoreBuffer> storeBuffers;
-	public static int storeBufferNumber;
+	public static LoadUnit loader;
 	
-	private static List<LoadBuffer> loadBuffer;
-	public static int loadBufferNumber;
+	public static StoreUnit storer;
+
 	
 	public static RegisterCollection registers_0 = new RegisterCollection(THREAD_0);
 	public static RegisterCollection registers_1 = new RegisterCollection(THREAD_1);
 	
-	public static int PC = 0; // start counter at 0
+	public static int CC = 0; // start counter at 0
+	
+	// The main memory
+	public static float[] memory;
 
 	/**
 	 * Constructor for processor class
@@ -48,16 +49,21 @@ public class Processor {
 	 * @param addReservationStationNumber	Number of reservation stations for ADD/SUB units
 	 * @param multReservationStationNumber	Number of reservation stations for MULT/DIV units
 	 */
-	public Processor(Queue<Instruction> instructionQ_0, Queue<Instruction> instructionQ_1, int addUnitNumber, int addUnitDelay,
-			int multUnitNumber, int multUnitDelay, int storeBufferNumber, int loadBufferNumber, 
+	public Processor(float[] memory, Queue<Instruction> instructionQ_0, Queue<Instruction> instructionQ_1, 
+			int addUnitNumber, int addUnitDelay,int multUnitNumber, 
+			int multUnitDelay, int storeBufferNumber, int loadBufferNumber, 
 			int addReservationStationNumber, int multReservationStationNumber) {
 		
-		super();
+		//super();
 		
+		Processor.memory = memory;
 		Processor.instructionQ = new InstructionQueue( instructionQ_0, instructionQ_1);
 
-		Processor.storeBufferNumber = storeBufferNumber;
-		Processor.loadBufferNumber = loadBufferNumber;
+		LoadUnit.reservationStationNumber = storeBufferNumber;
+		StoreUnit.reservationStationNumber = loadBufferNumber;
+		
+		loader = new LoadUnit();
+		storer = new StoreUnit();
 
 		
 		AddUnit.executionDelay = addUnitDelay;
@@ -70,20 +76,5 @@ public class Processor {
 		
 		
 	}
-
-
-	// experimenting!!
-	private void instructionQing(){
-		
-		// so long as there are still instructions to do, keep going.
-		while (!instructionQ.isEmpty()){
-			
-			instructionQ.attemptIssue();	// issue any new commands if possible
-			Adders.attemptPushToUnit(); // try to pass a command from the station to the units
-			Multers.attemptPushToUnit();
-		}
-	}
-	
-	
 	
 }

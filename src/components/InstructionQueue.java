@@ -58,13 +58,16 @@ public class InstructionQueue {
 			switch (inst.getOpCode()){
 			
 				case Instruction.ADD:;
-				case Instruction.SUB: result = AddUnit.acceptIssue(inst, Processor.THREAD_0); break;
+				case Instruction.SUB: result = AddUnit.acceptIntoStation(inst, Processor.THREAD_0); break;
 				
 				case Instruction.DIV:;
-				case Instruction.MULT: result = MultUnit.acceptIssue(inst, Processor.THREAD_0); break;
+				case Instruction.MULT: result = MultUnit.acceptIntoStation(inst, Processor.THREAD_0); break;
 				
-				// ADD SUPPORT FOR OTHER COMMANDS !!!!!!!!!!!!!!
+				case Instruction.LD: result = LoadUnit.acceptIntoStation(inst, Processor.THREAD_0); break;
+				case Instruction.ST: result = LoadUnit.acceptIntoStation(inst, Processor.THREAD_0); break;
 				
+				case Instruction.HALT: result = LoadUnit.acceptIntoStation(inst, Processor.THREAD_0); break;
+
 				default:	System.out.println("INVALID INSTRUCTION: " + inst.toString() + " Exiting!");
 				System.exit(0);	
 			}
@@ -72,7 +75,7 @@ public class InstructionQueue {
 			// If successful issue then remove instruction from the queue and set the issue cycle for the instruction
 			if (result){
 				inst = instructionQ_0.poll();
-				issueCC_0[inst.getqLocation()] = Processor.PC;
+				issueCC_0[inst.getqLocation()] = Processor.CC;
 			}
 	
 		}
@@ -86,12 +89,15 @@ public class InstructionQueue {
 			switch (inst.getOpCode()){
 			
 				case Instruction.ADD:;
-				case Instruction.SUB: result = AddUnit.acceptIssue(inst, Processor.THREAD_1); break;
+				case Instruction.SUB: result = AddUnit.acceptIntoStation(inst, Processor.THREAD_1); break;
 				
 				case Instruction.DIV:;
-				case Instruction.MULT: result = MultUnit.acceptIssue(inst, Processor.THREAD_1); break;
+				case Instruction.MULT: result = MultUnit.acceptIntoStation(inst, Processor.THREAD_1); break;
 				
-				// ADD SUPPORT FOR OTHER COMMANDS !!!!!!!!!!!!!!
+				case Instruction.LD: result = LoadUnit.acceptIntoStation(inst, Processor.THREAD_1); break;
+				case Instruction.ST: result = LoadUnit.acceptIntoStation(inst, Processor.THREAD_1); break;
+				
+				case Instruction.HALT: result = LoadUnit.acceptIntoStation(inst, Processor.THREAD_1); break;
 				
 				default:	System.out.println("INVALID INSTRUCTION: " + inst.toString() + " Exiting!");
 							System.exit(0);
@@ -101,7 +107,7 @@ public class InstructionQueue {
 			// If successful issue then remove instruction from the queue and set the issue cycle for the instruction
 			if (result){
 				inst = instructionQ_1.poll();
-				issueCC_1[inst.getqLocation()] = Processor.PC;	
+				issueCC_1[inst.getqLocation()] = Processor.CC;	
 			}
 	
 		}

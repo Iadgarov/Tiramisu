@@ -1,7 +1,5 @@
 package components;
 
-import components.ReservationStation.Tag;
-
 public class RegisterCollection {
 	
 	private float registers[];

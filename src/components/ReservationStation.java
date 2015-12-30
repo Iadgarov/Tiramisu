@@ -11,8 +11,11 @@ public class ReservationStation {
 
 	
 	// tags representing which reservation station we want
-	public final static int ADD_REPOSITORY = 1; 
-	public final static int MUL_REPOSITORY = -1;
+	public final static int ADD_REPOSITORY = 0; 
+	public final static int MUL_REPOSITORY = 1;
+	public final static int LOAD_REPOSITORY = 2;
+	public final static int STORE_REPOSITORY = 3;
+	
 
 	private int size;
 	Instruction[] instructions;
@@ -20,6 +23,7 @@ public class ReservationStation {
 	int opCode[];
 	float Vj[], Vk[];
 	Tag Qj[], Qk[];
+	int immediate[];
 	int thread[]; 	// which thread sent this instruction?
 	int type;		// ADD/SUB station or MULT/DIV station?
 	
@@ -43,6 +47,9 @@ public class ReservationStation {
 		this.Qj = new Tag[size];
 		this.Qk = new Tag[size];
 		
+		// The immediate value:
+		this.immediate = new int[size];
+		
 		// Which thread?
 		this.thread = new int[size];
 	}
@@ -64,6 +71,7 @@ public class ReservationStation {
 			
 		this.opCode[insertHere] = inst.getOpCode();
 		this.instructions[insertHere] = inst;
+		this.immediate[insertHere] = inst.getImmidiate();
 		
 		RegisterCollection registers;
 		// WHICH THREAD? 
@@ -73,32 +81,31 @@ public class ReservationStation {
 			registers = Processor.registers_1;
 	
 		
-			// if status is null then take value from register, otherwise set Q to status 
-			// For the J:
-			if  (registers.getStatus()[inst.getSrc0()] == null){
-				this.Vj[insertHere] = registers.getRegisters()[inst.getSrc0()];
-				this.Qj[insertHere] = null;
-			}
-			else{
-				this.Vj[insertHere] = (Float) null;
-				this.Qj[insertHere] = registers.getStatus()[inst.getSrc0()];	
-			}
-			// For the K:
-			if  (registers.getStatus()[inst.getSrc1()] == null){
-				this.Vj[insertHere] = registers.getRegisters()[inst.getSrc1()];
-				this.Qj[insertHere] = null;
-			}
-			else{
-				this.Vj[insertHere] = (Float) null;
-				this.Qj[insertHere] = registers.getStatus()[inst.getSrc1()];	
-			}	
+		// if status is null then take value from register, otherwise set Q to status 
+		// For the J:
+		if  (registers.getStatus()[inst.getSrc0()] == null){
+			this.Vj[insertHere] = registers.getRegisters()[inst.getSrc0()];
+			this.Qj[insertHere] = null;
+		}
+		else{
+			this.Vj[insertHere] = (Float) null;
+			this.Qj[insertHere] = registers.getStatus()[inst.getSrc0()];	
+		}
+		// For the K:
+		if  (registers.getStatus()[inst.getSrc1()] == null){
+			this.Vj[insertHere] = registers.getRegisters()[inst.getSrc1()];
+			this.Qj[insertHere] = null;
+		}
+		else{
+			this.Vj[insertHere] = (Float) null;
+			this.Qj[insertHere] = registers.getStatus()[inst.getSrc1()];	
+		}	
+		
+		// Update status for register being changed by this command, except for STORE command, no register update there
+		if (inst.getOpCode() != Instruction.ST){
 			
-			// Update status for register being changed by this command
-			if (inst.getOpCode() == Instruction.ADD || inst.getOpCode() == Instruction.SUB
-					|| inst.getOpCode() == Instruction.MULT ||inst.getOpCode() == Instruction.DIV){
-				
-				registers.getStatus()[inst.getDst()] = new Tag(this.type, insertHere, thread);
-			}
+			registers.getStatus()[inst.getDst()] = new Tag(this.type, insertHere, thread);
+		}
 		
 
 	}
@@ -138,82 +145,18 @@ public class ReservationStation {
 			if (this.Vj[i] != (Float)null && this.Vk[i] != (Float)null
 					&& this.Qj[i] == null && this.Qk[i] == null)
 				return i;
+			
+			// a Load command is always ready in our case
+			if (this.opCode[i] == Instruction.LD)
+				return i;
+			
+			// a Store command only needs src1
+			if (this.Vj[i] != (Float)null && this.Qj[i] == null && this.opCode[i] == Instruction.ST)
+				return i;
 		}
 		return -1;
 	}
 	
 
 	
-	
-	
-	///////////////////////////////////////////////////////////////////
-	
-	/**
-	 * Tag class, append this to data that is written to CDB so we know where it came from
-	 * (1,j,i) = ADD/SUB reservation station line j thread i
-	 * (-1,j,i) = MUL/FIV reservation station line j thread i
-	 * @author David
-	 *
-	 */
-	class Tag {
-		
-		private int station;
-		private int stationLine;
-		private int thread;
-		
-		public Tag(int station, int stationLine, int thread){
-			this.station = station;
-			this.stationLine = stationLine;
-			this.thread = thread;
-		}
-		
-		@Override
-		/**
-		 * Compares two tags, so we know if what is on the CDB is what we want
-		 * @param other object to compare to the relevant Tag
-		 * @return true is Tags are the same, false otherwise
-		 */
-		public boolean equals(Object other){
-			if(!(other instanceof Tag))
-				return false;
-			
-			Tag that = (Tag)other;
-			
-			if (that.getStation() != this.getStation())
-				return false;
-			if (that.getStationLine() != this.getStationLine())
-				return false;
-			if (that.getThread() != this.getThread())
-				return false;
-			
-			return true;
-				
-		}
-		
-		public int getStation() {
-			return station;
-		}
-		
-		public void setStation(int station) {
-			this.station = station;
-		}
-		
-		public int getStationLine() {
-			return stationLine;
-		}
-		
-		public void setStationLine(int stationLine) {
-			this.stationLine = stationLine;
-		}
-		
-		public int getThread() {
-			return thread;
-		}
-		
-		public void setThreadn(int thread) {
-			this.thread = thread;
-		}
-		
-		
-	}
 }

@@ -22,6 +22,7 @@ public class Instruction {
 	private int immidiate;
 	private int qLocation; 	// where is it in the instruction Queue
 	private int thread;		// which thread does it belong to
+	//private int currentExeCC; // how many CC's have we already spent in the execution?
 	
 	/**
 	 * Takes command line string from memory array and converts it into an instruction
