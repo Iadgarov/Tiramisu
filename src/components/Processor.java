@@ -12,11 +12,13 @@ public class Processor {
 	
 	
 	// Constants:
-	public final static int MEMORY_SIZE = 65536;
+	
 	public final static int THREAD_0	= 0;
 	public final static int THREAD_1	= 1;
 	
 	// Attributes:
+	public static int MEMORY_SIZE;
+	
 	public static InstructionQueue instructionQ;	// instructions
 	
 	public static Adders addUnits;
@@ -34,7 +36,7 @@ public class Processor {
 	public static int CC = 0; // start counter at 0
 	
 	// The main memory
-	public static float[] memory;
+	public static Float[] memory;
 
 	/**
 	 * Constructor for processor class
@@ -48,11 +50,12 @@ public class Processor {
 	 * @param loadBufferNumber	Number of load buffers
 	 * @param addReservationStationNumber	Number of reservation stations for ADD/SUB units
 	 * @param multReservationStationNumber	Number of reservation stations for MULT/DIV units
+	 * @param memDelay	The amount of CC's it takes to do a memory action (LOAD/STORE)
 	 */
-	public Processor(float[] memory, Queue<Instruction> instructionQ_0, Queue<Instruction> instructionQ_1, 
+	public Processor(Float[] memory, Queue<Instruction> instructionQ_0, Queue<Instruction> instructionQ_1, 
 			int addUnitNumber, int addUnitDelay,int multUnitNumber, 
 			int multUnitDelay, int storeBufferNumber, int loadBufferNumber, 
-			int addReservationStationNumber, int multReservationStationNumber) {
+			int addReservationStationNumber, int multReservationStationNumber, int memDelay) {
 		
 		//super();
 		
@@ -63,7 +66,9 @@ public class Processor {
 		StoreUnit.reservationStationNumber = loadBufferNumber;
 		
 		loader = new LoadUnit();
+		LoadUnit.executionDelay = memDelay;
 		storer = new StoreUnit();
+		StoreUnit.executionDelay = memDelay;
 
 		
 		AddUnit.executionDelay = addUnitDelay;

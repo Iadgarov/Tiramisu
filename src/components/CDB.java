@@ -14,6 +14,8 @@ public class CDB {
 	static List<Float> commitWhat;	// what is the data?
 	static List<Integer> commitWhere; // used to find location in memory for a store command
 	
+	static int totalCommits = 0;	// how many instructions have commited so far
+	
 	
 	/**
 	 * This method commits results from our calculations to the stations and registers once the time is right.
@@ -30,49 +32,72 @@ public class CDB {
 		for (int i = 0; i < commitWhen.size(); i++){
 			
 			// commit a cycle after execution is done
-			if (commitWhen.get(i) + 1 == Processor.CC){
+			if (commitWhen.get(i) + 1 >= Processor.CC){
 				
 				float result = commitWhat.get(i);
 				Tag tag = commitWho.get(i);
 				
-				// if this is not a STORE, update those that need it
-				if (tag.getStation() != ReservationStation.STORE_REPOSITORY){
-					// First the reservation stations:
-					if (!addCommit){
-						updateStation(result, tag, ReservationStation.ADD_REPOSITORY);	// ADD/SUB stations
+				if (tag.getStation() == ReservationStation.ADD_REPOSITORY)
+					if (addCommit)
+						continue; // already did an ADD/SUB commit in this CC
+					else 
 						addCommit = true;
-					}
-					if (!multCommit){
-						updateStation(result, tag, ReservationStation.MUL_REPOSITORY);	// MULT/DIV stations
+				else if (tag.getStation() == ReservationStation.MUL_REPOSITORY)
+					if (multCommit)
+						continue; // already did an MULT/DIV commit in this CC
+					else 
 						multCommit = true;
-					}
-					if (!memCommit){
-						updateStation(result, tag, ReservationStation.LOAD_REPOSITORY);	// MULT/DIV stations
+				else if (tag.getStation() == ReservationStation.LOAD_REPOSITORY)
+					if (memCommit)
+						continue; // already did an ADD/SUB commit in this CC
+					else 
 						memCommit = true;
-					}
-					if (!memCommit){
-						updateStation(result, tag, ReservationStation.STORE_REPOSITORY);	// MULT/DIV stations
+				else if (tag.getStation() == ReservationStation.STORE_REPOSITORY)
+					if (memCommit)
+						continue; // already did an ADD/SUB commit in this CC
+					else 
 						memCommit = true;
-					}
+				
+				
+				totalCommits++;
+				
+			
+				// if not a STORE command, update the others
+				if (tag.getStation() != ReservationStation.STORE_REPOSITORY){
+					
+					// First the reservation stations:
+					updateStation(result, tag, ReservationStation.ADD_REPOSITORY);	// ADD/SUB stations
+					updateStation(result, tag, ReservationStation.MUL_REPOSITORY);	// MULT/DIV stations
+					updateStation(result, tag, ReservationStation.LOAD_REPOSITORY);	// MULT/DIV stations
+					updateStation(result, tag, ReservationStation.STORE_REPOSITORY);	// MULT/DIV stations
+				
 					
 					// Next update the register file
 					updateRegisters(result, tag);
+				
+					// remember when this instruction was committed
+					if (tag.getThread() == Processor.THREAD_0)
+						InstructionQueue.writeBackCC_0[i] = Processor.CC;
+					else if (tag.getThread() == Processor.THREAD_1)
+						InstructionQueue.writeBackCC_1[i] = Processor.CC;
+					
 				}
-				else {
-					// STORE command, update the memory
-					if(!memCommit){
-						int address = commitWhere.get(i);
-						updateMemory(result, tag, address, i);	// STORE updating the memory
-					}
+				// STORE command, update the memory
+				else if(tag.getStation() == ReservationStation.LOAD_REPOSITORY){
+					int address = commitWhere.get(i);
+					updateMemory(result, tag, address, i);	// STORE updating the memory
+					
+					// remember when this instruction was committed
+					if (tag.getThread() == Processor.THREAD_0)
+						InstructionQueue.writeBackCC_0[i] = -1;
+					else if (tag.getThread() == Processor.THREAD_1)
+						InstructionQueue.writeBackCC_1[i] = -1;
 				}
-				
-				
-				// remember when this instruction was committed
-				if (tag.getThread() == Processor.THREAD_0)
-					InstructionQueue.writeBackCC_0[i] = Processor.CC;
-				else if (tag.getThread() == Processor.THREAD_1)
-					InstructionQueue.writeBackCC_1[i] = Processor.CC;
-				
+				else{
+					System.out.println("Unkown command type attempting to write on CDB. EXITING!");
+					System.exit(0);
+				}
+			
 				// this command has been committed, get rid of it
 				commitWhen.remove(i);
 				commitWho.remove(i);
@@ -81,6 +106,7 @@ public class CDB {
 			}
 		
 		}
+		
 		
 	}
 	

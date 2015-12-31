@@ -157,6 +157,21 @@ public class ReservationStation {
 		return -1;
 	}
 	
+	
+	/**
+	 * checks if this station has any commands in it 
+	 * @return	true if the station is empty , false otherwise
+	 */
+	public boolean isEmpty(){
+		
+		for(int i =0; i< this.size; i++){
+			if (this.opCode[i] != Instruction.EMPTY)
+				return false;
+		}
+		return true;
+		
+	}
+	
 
 	
 }
