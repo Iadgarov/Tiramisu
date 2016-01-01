@@ -10,12 +10,9 @@ import java.util.List;
  */
 public class Adders {
 
-	
 	private static List<AddUnit> addUnits;
 	public static int addUnitNumber;
 
-
-	
 	/**
 	 * Constructor for ADD/SUB unit collection
 	 * @param unitNumber	how many units?
@@ -73,33 +70,43 @@ public class Adders {
 	public static void attemptPushToUnit() {
 		
 		// find instruction that is ready to be pushed
-		int freeInstructionIndex = AddUnit.reservationStations.isReadyIndex();	// index of reservation station that we want
-		if (freeInstructionIndex == -1)
-			return; // nothing to push, no commands are ready
+		int freeInstructionIndex;
 		
-		// find unit that is capable accepting new instruction for execution
-		int freeUnitIndex = freeUnitIndex();
-		if (freeUnitIndex == -1)
-			return; // no free units available for execution work
-		
-		// We have an instruction and a unit willing to run it
-		// Mark this CC as the CC that this command started execution
-		Instruction inst = AddUnit.reservationStations.instructions[freeInstructionIndex];
-		if (inst.getThread() == Processor.THREAD_0){
+		// so long s there are instructions willing to execute keep going (will quit if out of not busy units) 
+		while ((freeInstructionIndex = AddUnit.reservationStations.isReadyIndex()) != -1){	// index of reservation station that we want
 			
-			if (InstructionQueue.issueCC_0[inst.getqLocation()] >= Processor.CC)
-				return; // it was just issued, wait another cycle at least
 			
-			InstructionQueue.exeCC_0[inst.getqLocation()] = Processor.CC;
+			if (freeInstructionIndex == -1)
+				return; // nothing to push, no commands are ready
+			
+			// find unit that is capable accepting new instruction for execution
+			int freeUnitIndex = freeUnitIndex();
+			if (freeUnitIndex == -1)
+				return; // no free units available for execution work
+			
+			// We have an instruction and a unit willing to run it
+			// Mark this CC as the CC that this command started execution
+			Instruction inst = AddUnit.reservationStations.instructions[freeInstructionIndex];
+			if (inst.getThread() == Processor.THREAD_0){
+				
+				if (InstructionQueue.issueCC_0[inst.getqLocation()] >= Processor.CC)
+					return; // it was just issued, wait another cycle at least
+				
+				InstructionQueue.exeCC_0[inst.getqLocation()] = Processor.CC;
+			}
+			else if (inst.getThread() == Processor.THREAD_1){
+				
+				if (InstructionQueue.issueCC_1[inst.getqLocation()] >= Processor.CC)
+					return; // it was just issued, wait another cycle at least
+				
+				InstructionQueue.exeCC_1[inst.getqLocation()] = Processor.CC;
+			}
+			AddUnit.reservationStations.inExecution[freeInstructionIndex] = true;	// this instruction has started execution
+			addUnits.get(freeUnitIndex).execute(freeInstructionIndex);
 		}
-		else if (inst.getThread() == Processor.THREAD_1){
-			
-			if (InstructionQueue.issueCC_1[inst.getqLocation()] >= Processor.CC)
-				return; // it was just issued, wait another cycle at least
-			
-			InstructionQueue.exeCC_1[inst.getqLocation()] = Processor.CC;
-		}
-		addUnits.get(freeUnitIndex).execute(freeInstructionIndex);
 		
+		
+		return;
 	}
+	
 }

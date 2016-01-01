@@ -48,34 +48,40 @@ public class Multers {
 	public static void attemptPushToUnit() {
 		
 		// find instruction that is ready to be pushed
-		int freeInstructionIndex = AddUnit.reservationStations.isReadyIndex();	// index of reservation station that we want
-		if (freeInstructionIndex == -1)
-			return; // nothing to push, no commands are ready
+		int freeInstructionIndex;	// index of reservation station that we want
 		
-		// find unit that is capable accepting new instruction for execution
-		int freeUnitIndex = freeUnitIndex();
-		if (freeUnitIndex == -1)
-			return; // no free units available for execution work
-		
-		// We have an instruction and a unit willing to run it
-		// Mark this CC as the CC that this command started execution
-		Instruction inst = AddUnit.reservationStations.instructions[freeInstructionIndex];
-		if (inst.getThread() == Processor.THREAD_0){
+		while ((freeInstructionIndex = MultUnit.reservationStations.isReadyIndex()) != -1){
 			
-			if (InstructionQueue.issueCC_0[inst.getqLocation()] >= Processor.CC)
-				return; // it was just issued, wait another cycle at least
+			if (freeInstructionIndex == -1)
+				return; // nothing to push, no commands are ready
 			
-			InstructionQueue.exeCC_0[inst.getqLocation()] = Processor.CC;
-		}	
-		else if (inst.getThread() == Processor.THREAD_1){
+			// find unit that is capable accepting new instruction for execution
+			int freeUnitIndex = freeUnitIndex();
+			if (freeUnitIndex == -1)
+				return; // no free units available for execution work
 			
-			if (InstructionQueue.issueCC_1[inst.getqLocation()] >= Processor.CC)
-				return; // it was just issued, wait another cycle at least
+			// We have an instruction and a unit willing to run it
+			// Mark this CC as the CC that this command started execution
+			Instruction inst = MultUnit.reservationStations.instructions[freeInstructionIndex];
+			if (inst.getThread() == Processor.THREAD_0){
+				
+				if (InstructionQueue.issueCC_0[inst.getqLocation()] >= Processor.CC)
+					return; // it was just issued, wait another cycle at least
+				
+				InstructionQueue.exeCC_0[inst.getqLocation()] = Processor.CC;
+			}	
+			else if (inst.getThread() == Processor.THREAD_1){
+				
+				if (InstructionQueue.issueCC_1[inst.getqLocation()] >= Processor.CC)
+					return; // it was just issued, wait another cycle at least
+				
+				InstructionQueue.exeCC_1[inst.getqLocation()] = Processor.CC;
+			}
 			
-			InstructionQueue.exeCC_1[inst.getqLocation()] = Processor.CC;
+			MultUnit.reservationStations.inExecution[freeInstructionIndex] = true;	// this instruction has started execution
+			multUnits.get(freeUnitIndex).execute(freeInstructionIndex);
 		}
-		multUnits.get(freeUnitIndex).execute(freeInstructionIndex);
-
+		return;
 	}
 	
 	

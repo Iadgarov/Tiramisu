@@ -1,6 +1,7 @@
 package components;
 
 
+import java.util.ArrayList;
 import java.util.Queue;
 
 /**
@@ -12,12 +13,12 @@ public class Processor {
 	
 	
 	// Constants:
-	
+	public final static int MAX_MEMORY_SIZE = 65536;
 	public final static int THREAD_0	= 0;
 	public final static int THREAD_1	= 1;
 	
 	// Attributes:
-	public static int MEMORY_SIZE;
+	public static int InstAmount;
 	
 	public static InstructionQueue instructionQ;	// instructions
 	
@@ -36,7 +37,7 @@ public class Processor {
 	public static int CC = 0; // start counter at 0
 	
 	// The main memory
-	public static Float[] memory;
+	public static ArrayList<Float> memory;
 
 	/**
 	 * Constructor for processor class
@@ -52,23 +53,25 @@ public class Processor {
 	 * @param multReservationStationNumber	Number of reservation stations for MULT/DIV units
 	 * @param memDelay	The amount of CC's it takes to do a memory action (LOAD/STORE)
 	 */
-	public Processor(Float[] memory, Queue<Instruction> instructionQ_0, Queue<Instruction> instructionQ_1, 
+	public Processor( Queue<Instruction> instructionQ_0, Queue<Instruction> instructionQ_1, 
 			int addUnitNumber, int addUnitDelay,int multUnitNumber, 
 			int multUnitDelay, int storeBufferNumber, int loadBufferNumber, 
 			int addReservationStationNumber, int multReservationStationNumber, int memDelay) {
 		
 		//super();
 		
-		Processor.memory = memory;
+		Processor.memory = Sim.memory;
 		Processor.instructionQ = new InstructionQueue( instructionQ_0, instructionQ_1);
 
 		LoadUnit.reservationStationNumber = storeBufferNumber;
 		StoreUnit.reservationStationNumber = loadBufferNumber;
 		
-		loader = new LoadUnit();
 		LoadUnit.executionDelay = memDelay;
-		storer = new StoreUnit();
+		loader = new LoadUnit();
+		
 		StoreUnit.executionDelay = memDelay;
+		storer = new StoreUnit();
+		
 
 		
 		AddUnit.executionDelay = addUnitDelay;

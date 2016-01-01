@@ -1,7 +1,5 @@
 package components;
 
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * the MUL/DIV class. A processing unit for floating point multiplication and division. 
@@ -12,7 +10,7 @@ public class MultUnit{
 	
 	static int executionDelay;
 	static int reservationStationNumber;
-	private boolean busy[];	// true if station is busy in a specific CC
+	private boolean busy[];		// true if station is busy in a specific CC
 	static ReservationStation reservationStations;
 	
 	
@@ -21,8 +19,8 @@ public class MultUnit{
 	 */
 	public MultUnit() {
 		
-		this.busy = new boolean[Processor.MEMORY_SIZE];
-		for (int i = 0; i < Processor.MEMORY_SIZE; i++)
+		this.busy = new boolean[Processor.MAX_MEMORY_SIZE];
+		for (int i = 0; i < Processor.MAX_MEMORY_SIZE; i++)
 			this.busy[i] = false; // all stations start as available at first
 		MultUnit.reservationStations = createStations();
 		
@@ -45,11 +43,16 @@ public class MultUnit{
 	 */
 	public void execute(int stationNumber) {
 		
+		System.out.println("[CC = " + Processor.CC + "] Exe start for  " + reservationStations.instructions[stationNumber].toString() );
+
+		
 		int thread = reservationStations.instructions[stationNumber].getThread(); // thread this command belongs to
 		int command = reservationStations.opCode[stationNumber];
 		float src0 = reservationStations.Vj[stationNumber];
 		float src1 = reservationStations.Vk[stationNumber];
 		
+		
+		//int t = Processor.CC;
 		for (int i = 0; i < executionDelay; i++)
 			this.busy[Processor.CC + i] = true; // this unit will be working for these CC's
 		
@@ -60,18 +63,18 @@ public class MultUnit{
 		else if (command == Instruction.DIV)
 			result = src0 / src1;
 		else {
-			System.out.println("NONE ADD/SUB COMMAND SENT TO ADD/SUB UNIT!! EXITING");
+			System.out.println("[MultUnit>execute] NONE MULT/DIV COMMAND SENT TO MULT/DIV UNIT!! EXITING");
 			System.exit(0);
 		}
 		
-		// remove instruction from the station, it has been taken care of
-		reservationStations.opCode[stationNumber] = Instruction.EMPTY;
-		reservationStations.Vj[stationNumber] = (Float)null;
-		reservationStations.Vk[stationNumber] = (Float)null;
-		
 		//write result to CDB, along with who calculated it
-		CDB.writeToCDB( result, new Tag(ReservationStation.ADD_REPOSITORY, 
-				stationNumber, thread), Processor.CC + executionDelay);
+				CDB.writeToCDB( result, new Tag(ReservationStation.MUL_REPOSITORY, 
+						stationNumber, thread,  
+						reservationStations.instructions[stationNumber]), 
+						Processor.CC + executionDelay);
+				
+		
+		
 	}
 	
 	/**

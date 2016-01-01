@@ -6,9 +6,9 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.PriorityQueue;
+
 import java.util.Queue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class Sim {
 	
@@ -21,7 +21,7 @@ public class Sim {
 	private final static String ADD_RS_AMOUNT 		= "add_nr_reservation";
 	private final static String MULT_RS_AMOUNT 		= "mul_nr_reservation";
 	private final static String LOAD_BUFF_AMOUNT 	= "mem_nr_load_buffers";
-	private final static String STORE_BUFF_AMOUNT	= "mem_nr_load_buffers";
+	private final static String STORE_BUFF_AMOUNT	= "mem_nr_store_buffers";
 	
 	private  static int addUnitAmount;
 	private  static int multUnitAmount;
@@ -33,7 +33,8 @@ public class Sim {
 	private  static int loadBuffAmount;
 	private  static int storeBuffAmount;
 	
-	private static ArrayList<Float> memory;
+	static ArrayList<Float> memory = new ArrayList<>();
+	static ArrayList<String> memoryInString = new ArrayList<>();
 
 	public static void main(String[] args) {
 	
@@ -44,38 +45,51 @@ public class Sim {
 		receive(true, args[1]);
 		// set up initial memory picture
 		receive(false, args[2]);
-		Processor.MEMORY_SIZE = memory.size();
+		Processor.InstAmount = memory.size();
 		
-		Queue<Instruction> instQ_0 = new PriorityQueue<Instruction>();
-		Queue<Instruction> instQ_1 = new PriorityQueue<Instruction>();
+		Queue<Instruction> instQ_0 = new LinkedBlockingQueue<Instruction>();
+		Queue<Instruction> instQ_1 = new LinkedBlockingQueue<Instruction>();
 		
 		// create the two queues of instructions
 		
-		boolean Q0Halt = false;	// has queue 0 reached halt?
-		boolean Q1Halt = false;	// has queue 1 reached halt?
-		for (int i = 0 ;; i++){
+		boolean Q0Halt = false;	// has queue 0 gotten halt?
+		boolean Q1Halt = false;	// has queue 1 gotten halt?
+		
+
+		
+		for (int i = 0 ; !(Q0Halt && Q1Halt); i++){
 			
-			if ((i % 2 == 0) && !Q0Halt){
-				instQ_0.add(new Instruction((Float.toHexString(memory.get(i)))));
-				InstructionQueue.isntHexEncoding_0[i/2] = Float.toHexString(memory.get(i));
+			Instruction inst = new Instruction(memoryInString.get(i));
+			
+			
+			if (i % 2 == 0 && !Q0Halt){
+				instQ_0.add(inst);
+				inst.setqLocation(i/2);
+				inst.setThread(i%2);
+				InstructionQueue.isntHexEncoding_0[i/2] = memoryInString.get(i);
 				InstructionQueue.instCount_0++;
-				if (instQ_0.peek().getOpCode() == Instruction.HALT)
+				
+				if (inst.getOpCode() == Instruction.HALT)
 					Q0Halt = true;	
 			}
-			else if (!Q1Halt){ 
-				instQ_1.add(new Instruction((Float.toHexString(memory.get(i)))));
-				InstructionQueue.isntHexEncoding_1[i/2] = Float.toHexString(memory.get(i));
+			else if (i % 2 == 1 && !Q1Halt){ 
+				instQ_1.add(inst);
+				inst.setqLocation(i/2);
+				inst.setThread(i%2);
+				InstructionQueue.isntHexEncoding_1[i/2] = memoryInString.get(i);
 				InstructionQueue.instCount_1++;
-				if (instQ_1.peek().getOpCode() == Instruction.HALT)
+				
+				if (inst.getOpCode() == Instruction.HALT)
 					Q1Halt = true;
 			}
-			else
-				break;
+			
+			
 			
 		}
+
 		
 		// create the processor
-		Processor CPU = new Processor((Float[])memory.toArray(), instQ_0, instQ_1, addUnitAmount ,
+		new Processor(instQ_0, instQ_1, addUnitAmount ,
 				addDelay, multUnitAmount, multDelay, storeBuffAmount, loadBuffAmount, 
 				addStationAmount, multStationAmount, memDelay);
 		
@@ -88,7 +102,7 @@ public class Sim {
 		traceToFile(args[5], Processor.THREAD_0);
 		traceToFile(args[8], Processor.THREAD_1);
 		CPIToFile(args[6], Processor.THREAD_0);
-		CPIToFile(args[6], Processor.THREAD_1);
+		CPIToFile(args[9], Processor.THREAD_1);
 		
 		
 	}
@@ -112,11 +126,14 @@ public class Sim {
 				 (AddUnit.reservationStations.isEmpty()) &&				// stations/buffers are empty of commands
 				 (MultUnit.reservationStations.isEmpty()) &&
 				 (LoadUnit.reservationStations.isEmpty()) &&
-				 (StoreUnit.reservationStations.isEmpty()) &&
+				 (StoreUnit.reservationStations.isEmpty()) && 
 				 (InstructionQueue.halt0) &&							// reached first halt
 				 (InstructionQueue.halt1))){							// reached second halt
 			
-			Processor.instructionQ.attemptIssue();	// issue any new commands if possible
+			
+			for (int i = 0; i < 4; i++ )
+				Processor.instructionQ.attemptIssue();	// issue any new commands if possible
+			
 			// Pass any commands that we can to the units
 			Adders.attemptPushToUnit(); 
 			Multers.attemptPushToUnit();
@@ -126,6 +143,9 @@ public class Sim {
 			CDB.commit(); // write back whatever is ready to be written back
 			
 			Processor.CC++; // onto the next cycle
+			
+			//System.out.println("ADD STATION: \n" + AddUnit.reservationStations.toString());
+			//System.out.println("MULT STATION: \n" + MultUnit.reservationStations.toString());
 			
 		}
 		
@@ -141,7 +161,7 @@ public class Sim {
 	private static void receive(boolean whatDo, String file){
 		
 		String line;
-		int i = 0;
+		//int i = 0;
 		
         try {
         
@@ -152,8 +172,10 @@ public class Sim {
             	
             	if (whatDo)
             		getCfgData(line);
-            	else
+            	else{
             		memory.add(hexStringToFloat(line));
+            		memoryInString.add(line.substring(0, 8));
+            	}
       
             }   
 
@@ -177,9 +199,10 @@ public class Sim {
 	 */
 	private static void getCfgData(String line){
 		
-    	if (line.contains(ADD_UNIT_AMOUNT))
+		//System.out.println(line);
+    	if (line.contains(ADD_UNIT_AMOUNT + " "))			// add spaces to prevent prefix issues with contain
     		addUnitAmount = getDataFromSring(line);
-    	else if (line.contains(MULT_UNIT_AMOUNT))
+    	else if (line.contains(MULT_UNIT_AMOUNT + " "))		// add spaces to prevent prefix issues with contain
     		multUnitAmount = getDataFromSring(line);
     	else if (line.contains(ADD_UNIT_DELAY))
     		addDelay = getDataFromSring(line);
@@ -204,9 +227,9 @@ public class Sim {
 	 */
 	private static int getDataFromSring(String st){
 		
-		st.replaceAll("\\s+", "");	// remove white spaces
+		//st.replaceAll("\\s+", "");	// remove white spaces
 		int i = st.indexOf('='); 	// find equation sign, data is after this
-		String data = st.substring(i + 1, st.length());
+		String data = st.substring(i + 2, st.length());
 		return Integer.parseInt(data);
 	}
 
@@ -215,17 +238,15 @@ public class Sim {
 	 * @param file	the path to the file we want to write in
 	 */
 	private static void memoryToFile(String file){
-		
-		String writeMe= "";
-		
-		for (float i:Processor.memory){
-			writeMe.concat(Float.toHexString(i) + System.getProperty("line.seperator"));
-		}
-		
-		
+			
 		try{
 			PrintWriter writer = new PrintWriter(file, "UTF-8");
-			writer.print(writeMe);
+			for (float i : Processor.memory){
+				String temp = Integer.toHexString(Float.floatToIntBits(i)).toUpperCase();
+				if (temp.equals("0"))
+					temp = "00000000";
+				writer.println(temp);
+			}
 			writer.close();
 		} catch (IOException x) {
 		    System.err.format("IOException: %s%n", x);
@@ -242,7 +263,7 @@ public class Sim {
 	 */
 	private static void registersToFile(String file, int thread){
 		
-		String writeMe= "";
+		
 		RegisterCollection rg = null;
 		
 		if (thread == Processor.THREAD_0)
@@ -253,16 +274,12 @@ public class Sim {
 			System.out.println("Attempted access to register of an undefined thread! EXITING!");
 			System.exit(0);
 		}
-		
-		
-		for (float i : rg.getRegisters()){
-			writeMe.concat(i + System.getProperty("line.seperator"));
-		}
-		
-		
+	
 		try{
 			PrintWriter writer = new PrintWriter(file, "UTF-8");
-			writer.print(writeMe);
+			for (float i : rg.getRegisters()){
+				writer.println(i);
+			}
 			writer.close();
 		} catch (IOException x) {
 		    System.err.format("IOException: %s%n", x);
@@ -277,33 +294,36 @@ public class Sim {
 	 */
 	private static void traceToFile(String file, int thread){
 		
-		String writeMe= "";
+		
 
 		try{
 			PrintWriter writer = new PrintWriter(file, "UTF-8");
 			
-			for (int i = 0; i < Processor.MEMORY_SIZE; i++){
+			//for (int i = 0; i < Processor.InstAmount; i++){
 				
-				if (thread == Processor.THREAD_0){
-					writeMe.concat(InstructionQueue.isntHexEncoding_0[i] + " ");
-					writeMe.concat(Integer.toString(InstructionQueue.issueCC_0[i]) + " ");
-					writeMe.concat(Integer.toString(InstructionQueue.exeCC_0[i]) + " ");
-					writeMe.concat(Integer.toString(InstructionQueue.writeBackCC_0[i]) + System.getProperty("line.seperator"));
-				
+			if (thread == Processor.THREAD_0){
+				for (int i = 0; i < InstructionQueue.instCount_0; i++){
+					writer.print(InstructionQueue.isntHexEncoding_0[i] + "\t");
+					writer.print(Integer.toString(InstructionQueue.issueCC_0[i]) + "\t");
+					writer.print(Integer.toString(InstructionQueue.exeCC_0[i]) + "\t");
+					writer.println(Integer.toString(InstructionQueue.writeBackCC_0[i]));
 				}
-				else if (thread == Processor.THREAD_1){
-					writeMe.concat(InstructionQueue.isntHexEncoding_1[i] + " ");
-					writeMe.concat(Integer.toString(InstructionQueue.issueCC_1[i]) + " ");
-					writeMe.concat(Integer.toString(InstructionQueue.exeCC_1[i]) + " ");
-					writeMe.concat(Integer.toString(InstructionQueue.writeBackCC_1[i]) + System.getProperty("line.seperator"));
-				}
-				else{
-					System.out.println("Attempted access instructions of an undefined thread! EXITING!");
-					System.exit(0);
-				}
-				writer.println(writeMe);
 			
-			}	
+			}
+			else if (thread == Processor.THREAD_1){
+				for (int i = 0; i < InstructionQueue.instCount_1; i++){
+					writer.print(InstructionQueue.isntHexEncoding_1[i] + "\t");
+					writer.print(Integer.toString(InstructionQueue.issueCC_1[i]) + "\t");
+					writer.print(Integer.toString(InstructionQueue.exeCC_1[i]) + "\t");
+					writer.println(Integer.toString(InstructionQueue.writeBackCC_1[i]));
+				}
+			}
+			else{
+				System.out.println("Attempted access instructions of an undefined thread! EXITING!");
+				System.exit(0);
+			}
+				
+			
 				
 			writer.close();
 		} catch (IOException x) {
@@ -319,7 +339,6 @@ public class Sim {
 	 */
 	private static void CPIToFile(String file, int thread){
 		
-		String writeMe= "";
 		int totalInstructionCount = 0;
 		int totalCycleCount = 0;
 		
@@ -345,7 +364,7 @@ public class Sim {
 				System.out.println("Attempted access instructions of an undefined thread! EXITING!");
 				System.exit(0);
 			}
-			writer.println(Float.toString((float)(totalInstructionCount/totalCycleCount)));
+			writer.println(Float.toString((float)(totalCycleCount/totalInstructionCount)));
 			writer.close();
 		} catch (IOException x) {
 		    System.err.format("IOException: %s%n", x);

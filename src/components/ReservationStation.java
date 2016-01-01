@@ -1,5 +1,7 @@
 package components;
 
+import java.util.ArrayList;
+
 import components.Processor;
 /**
  * Reservation station class
@@ -21,11 +23,15 @@ public class ReservationStation {
 	Instruction[] instructions;
 	// INSERT FUNCTION TO SET ALL SPOTS TO EMPTY
 	int opCode[];
-	float Vj[], Vk[];
+	Float Vj[], Vk[];
 	Tag Qj[], Qk[];
 	int immediate[];
-	int thread[]; 	// which thread sent this instruction?
-	int type;		// ADD/SUB station or MULT/DIV station?
+	int thread[]; 			// which thread sent this instruction?
+	int acceptedWhen[]; 	// CC that this got into the station
+	boolean inExecution[];	// did we already push this to unit? Don't want to push something twice..
+	int type;				// ADD/SUB station or MULT/DIV station?
+	
+	private int entryNumber = 0;
 	
 	
 	/**
@@ -39,9 +45,13 @@ public class ReservationStation {
 		this.instructions = new Instruction[size];
 		this.opCode = new int[size];
 		
+		// initialize all stations to empty
+		for (int i = 0; i < this.opCode.length; i++)
+			this.opCode[i] = Instruction.EMPTY;
+		
 		// Values will be NULL if waiting for update from Q's
-		this.Vj = new float[size];
-		this.Vk = new float[size];
+		this.Vj = new Float[size];
+		this.Vk = new Float[size];
 		
 		// Will be NULL if value is already in V's
 		this.Qj = new Tag[size];
@@ -49,6 +59,14 @@ public class ReservationStation {
 		
 		// The immediate value:
 		this.immediate = new int[size];
+		
+		// The CC when command joined the station
+		this.acceptedWhen = new int[size];
+		
+		// Executing or not?
+		this.inExecution = new boolean[size];
+		for (int i = 0; i < size; i++)
+			this.inExecution[i] = false;	// set inital state
 		
 		// Which thread?
 		this.thread = new int[size];
@@ -68,10 +86,17 @@ public class ReservationStation {
 			System.out.println("I told you not to force addition to a full station!!! Exiting\n");
 			System.exit(0);
 		}
+		
+		
+		if (inst.getThread() != thread)
+			System.out.println("SOMETHING IS WRONG! Instruction: " + inst.toString() + 
+					" thinks thread is " + inst.getThread() + 
+					" But thread is " + thread);
 			
 		this.opCode[insertHere] = inst.getOpCode();
 		this.instructions[insertHere] = inst;
 		this.immediate[insertHere] = inst.getImmidiate();
+		this.acceptedWhen[insertHere] = entryNumber++;
 		
 		RegisterCollection registers;
 		// WHICH THREAD? 
@@ -93,18 +118,19 @@ public class ReservationStation {
 		}
 		// For the K:
 		if  (registers.getStatus()[inst.getSrc1()] == null){
-			this.Vj[insertHere] = registers.getRegisters()[inst.getSrc1()];
-			this.Qj[insertHere] = null;
+			this.Vk[insertHere] = registers.getRegisters()[inst.getSrc1()];
+			this.Qk[insertHere] = null;
 		}
 		else{
-			this.Vj[insertHere] = (Float) null;
-			this.Qj[insertHere] = registers.getStatus()[inst.getSrc1()];	
+			this.Vk[insertHere] = (Float) null;
+			this.Qk[insertHere] = registers.getStatus()[inst.getSrc1()];	
 		}	
 		
 		// Update status for register being changed by this command, except for STORE command, no register update there
 		if (inst.getOpCode() != Instruction.ST){
 			
-			registers.getStatus()[inst.getDst()] = new Tag(this.type, insertHere, thread);
+			registers.getStatus()[inst.getDst()] = new Tag(this.type, insertHere, thread, inst);
+			System.out.print("");
 		}
 		
 
@@ -126,7 +152,7 @@ public class ReservationStation {
 	 */
 	public int emptySpotIndex(){
 		
-		for(int i =0; i< this.size; i++){
+		for(int i = 0; i < this.size; i++){
 			if (this.opCode[i] == Instruction.EMPTY)
 				return i;
 		}
@@ -135,26 +161,43 @@ public class ReservationStation {
 	
 	/**
 	 * gets the index of a command that is in the station and ready to be executed
+	 * If there are several, choose the one with the smallest issue CC!!!
 	 * @return index of instruction that is ready to be executed, -1 if no such instruction exists
 	 */
 	public int isReadyIndex(){
 		
-		for(int i =0; i< this.size; i++){
+		ArrayList<Integer> temp = new ArrayList<>();
+			
+		
+		// gather all ready commands
+		for(int i = 0; i < this.size; i++){
 			
 			// if the values are ready and the pointers are not pointing then command is ready
-			if (this.Vj[i] != (Float)null && this.Vk[i] != (Float)null
-					&& this.Qj[i] == null && this.Qk[i] == null)
-				return i;
+			if (this.Vj[i] != null && this.Vk[i] != null
+					&& this.Qj[i] == null && this.Qk[i] == null && !this.inExecution[i])
+				temp.add(i);
 			
 			// a Load command is always ready in our case
-			if (this.opCode[i] == Instruction.LD)
-				return i;
+			if (this.opCode[i] == Instruction.LD && !this.inExecution[i])
+				temp.add(i);
 			
 			// a Store command only needs src1
-			if (this.Vj[i] != (Float)null && this.Qj[i] == null && this.opCode[i] == Instruction.ST)
-				return i;
+			if (this.Vj[i] != (Float)null && this.Qj[i] == null && 
+					this.opCode[i] == Instruction.ST && !this.inExecution[i])
+				temp.add(i);
 		}
-		return -1;
+		
+		if (temp.isEmpty())
+			return -1;
+		
+		// choose oldest ready command
+		int returnMe = temp.get(0);
+		for (int i : temp){
+			if (this.acceptedWhen[i] < this.acceptedWhen[returnMe])
+				returnMe = i;
+		}
+		
+		return returnMe;
 	}
 	
 	
@@ -169,6 +212,32 @@ public class ReservationStation {
 				return false;
 		}
 		return true;
+		
+	}
+	
+	public String toString(){
+		
+		String returnMe = "";
+		
+		String a = "",b = ""; 
+		
+		for (int i = 0; i < this.size; i++){
+			returnMe += "[Line " + i + "]: ";
+			if (this.instructions[i] == null)
+				returnMe += "NULL\n";
+			else{
+				
+				if ( this.Qj[i] != null){
+					a = this.Qj[i].toString();
+				}
+				if ( this.Qk[i] != null){
+					b = this.Qk[i].toString();
+				}
+				returnMe += this.instructions[i].toString() + " Needs: \n" + a + "\n" + b ;
+				
+			}
+		}
+		return returnMe;
 		
 	}
 	

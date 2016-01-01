@@ -12,10 +12,10 @@ public class StoreUnit {
 	 */
 	public StoreUnit() {
 		
-		this.busy = new boolean[Processor.MEMORY_SIZE];
-		for (int i = 0; i < Processor.MEMORY_SIZE; i++)
-			this.busy[i] = false; // all stations start as available at first
-		LoadUnit.reservationStations = createStations();
+		busy = new boolean[Processor.MAX_MEMORY_SIZE];
+		for (int i = 0; i < Processor.MAX_MEMORY_SIZE; i++)
+			busy[i] = false; // all stations start as available at first
+		StoreUnit.reservationStations = createStations();
 		
 	}
 
@@ -26,7 +26,7 @@ public class StoreUnit {
 	private ReservationStation createStations() {
 		
 		int temp = reservationStationNumber;
-		return new ReservationStation(temp, ReservationStation.LOAD_REPOSITORY);
+		return new ReservationStation(temp, ReservationStation.STORE_REPOSITORY);
 		
 	}
 
@@ -57,13 +57,7 @@ public class StoreUnit {
 		
 		//write result to CDB, along with who calculated it
 		CDB.writeToCDB( result, null, Processor.CC + executionDelay, reservationStations.immediate[stationNumber]);
-		
-		
-		// remove instruction from the station, it has been taken care of
-		reservationStations.opCode[stationNumber] = Instruction.EMPTY;
-		reservationStations.Vj[stationNumber] = (Float)null;
-		reservationStations.Vk[stationNumber] = (Float)null;
-		
+
 
 	}
 	
@@ -98,33 +92,43 @@ public class StoreUnit {
 	public static void attemptPushToUnit() {
 		
 		// find instruction that is ready to be pushed
-		int freeInstructionIndex = reservationStations.isReadyIndex();	// index of reservation station that we want
-		if (freeInstructionIndex == -1)
-			return; // nothing to push, no commands are ready
 		
-
+		//ReservationStation t = reservationStations;
+		
+		int freeInstructionIndex;;	// index of reservation station that we want
+		
+		while ((freeInstructionIndex = reservationStations.isReadyIndex()) != -1){
+				
+			
+			if (freeInstructionIndex == -1)
+				return; // nothing to push, no commands are ready
+			
 	
-		if (isBusy(Processor.CC))
-			return; // no free units available for execution work
 		
-		// We have an instruction and a unit willing to run it
-		// Mark this CC as the CC that this command started execution
-		Instruction inst = AddUnit.reservationStations.instructions[freeInstructionIndex];
-		if (inst.getThread() == Processor.THREAD_0){
+			if (isBusy(Processor.CC))
+				return; // no free units available for execution work
 			
-			if (InstructionQueue.issueCC_0[inst.getqLocation()] >= Processor.CC)
-				return; // it was just issued, wait another cycle at least
+			// We have an instruction and a unit willing to run it
+			// Mark this CC as the CC that this command started execution
+			Instruction inst = AddUnit.reservationStations.instructions[freeInstructionIndex];
+			if (inst.getThread() == Processor.THREAD_0){
+				
+				if (InstructionQueue.issueCC_0[inst.getqLocation()] >= Processor.CC)
+					return; // it was just issued, wait another cycle at least
+				
+				InstructionQueue.exeCC_0[inst.getqLocation()] = Processor.CC;
+			}
+			else if (inst.getThread() == Processor.THREAD_1){
+				
+				if (InstructionQueue.issueCC_1[inst.getqLocation()] >= Processor.CC)
+					return; // it was just issued, wait another cycle at least
+				
+				InstructionQueue.exeCC_1[inst.getqLocation()] = Processor.CC;
+			}
 			
-			InstructionQueue.exeCC_0[inst.getqLocation()] = Processor.CC;
+			reservationStations.inExecution[freeInstructionIndex] = true;	// this instruction has started execution
+			execute(freeInstructionIndex);	
 		}
-		else if (inst.getThread() == Processor.THREAD_1){
-			
-			if (InstructionQueue.issueCC_1[inst.getqLocation()] >= Processor.CC)
-				return; // it was just issued, wait another cycle at least
-			
-			InstructionQueue.exeCC_1[inst.getqLocation()] = Processor.CC;
-		}
-		execute(freeInstructionIndex);	
 	}
 
 }

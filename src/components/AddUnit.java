@@ -12,8 +12,8 @@ public class AddUnit{
 	 */
 	public AddUnit() {
 		
-		this.busy = new boolean[Processor.MEMORY_SIZE];
-		for (int i = 0; i < Processor.MEMORY_SIZE; i++)
+		this.busy = new boolean[Processor.MAX_MEMORY_SIZE];
+		for (int i = 0; i < Processor.MAX_MEMORY_SIZE; i++)
 			this.busy[i] = false; // all stations start as available at first
 		AddUnit.reservationStations = createStations();
 		
@@ -37,6 +37,9 @@ public class AddUnit{
 	 */
 	public void execute(int stationNumber) {
 		
+		System.out.println("[CC = " + Processor.CC + "] Exe start for  " + reservationStations.instructions[stationNumber].toString() );
+
+		
 		int thread = reservationStations.instructions[stationNumber].getThread(); // thread this command belongs to
 		int command = reservationStations.opCode[stationNumber];
 		float src0 = reservationStations.Vj[stationNumber];
@@ -53,18 +56,15 @@ public class AddUnit{
 		else if (command == Instruction.SUB)
 			result = src0 - src1;
 		else {
-			System.out.println("NONE ADD/SUB COMMAND SENT TO ADD/SUB UNIT!! EXITING");
+			System.out.println("[AddUnit>execute] NONE ADD/SUB COMMAND SENT TO ADD/SUB UNIT!! EXITING");
 			System.exit(0);
 		}
 		
-		// remove instruction from the station, it has been taken care of
-		reservationStations.opCode[stationNumber] = Instruction.EMPTY;
-		reservationStations.Vj[stationNumber] = (Float)null;
-		reservationStations.Vk[stationNumber] = (Float)null;
-		
 		//write result to CDB, along with who calculated it
-		CDB.writeToCDB( result, new Tag (ReservationStation.ADD_REPOSITORY, 
-				stationNumber, thread), Processor.CC + executionDelay);
+		Tag tag = new Tag (ReservationStation.ADD_REPOSITORY, stationNumber, 
+				thread, reservationStations.instructions[stationNumber]);
+		CDB.writeToCDB( result, tag, Processor.CC + executionDelay);
+		
 	}
 	
 	/**

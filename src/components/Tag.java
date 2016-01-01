@@ -13,11 +13,13 @@ class Tag {
 	private int station;
 	private int stationLine;
 	private int thread;
+	private Instruction inst;
 	
-	public Tag(int station, int stationLine, int thread){
+	public Tag(int station, int stationLine, int thread, Instruction inst){
 		this.station = station;
 		this.stationLine = stationLine;
 		this.thread = thread;
+		this.inst = inst;
 	}
 	
 	@Override
@@ -51,6 +53,14 @@ class Tag {
 		this.station = station;
 	}
 	
+	public Instruction getInstruction() {
+		return inst;
+	}
+	
+	public void setInstruction(Instruction inst) {
+		this.inst = inst;
+	}
+	
 	public int getStationLine() {
 		return stationLine;
 	}
@@ -67,5 +77,8 @@ class Tag {
 		this.thread = thread;
 	}
 	
-	
+	public String toString(){
+		
+		return "Who: station = " + this.getStation() + " line = " + this.getStationLine() + " thread = " + this.getThread();
+	}
 }
