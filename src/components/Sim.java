@@ -266,10 +266,14 @@ public class Sim {
 		
 		RegisterCollection rg = null;
 		
-		if (thread == Processor.THREAD_0)
+		if (thread == Processor.THREAD_0){
 			rg = Processor.registers_0;
-		else if (thread == Processor.THREAD_1)
+			System.out.println("Registers for thread 0:");
+		}
+		else if (thread == Processor.THREAD_1){
 			rg = Processor.registers_1;
+			System.out.println("Registers for thread 1:");
+		}
 		else{
 			System.out.println("Attempted access to register of an undefined thread! EXITING!");
 			System.exit(0);
@@ -277,9 +281,15 @@ public class Sim {
 	
 		try{
 			PrintWriter writer = new PrintWriter(file, "UTF-8");
+			System.out.print("[");
+			int count = 0;
 			for (float i : rg.getRegisters()){
 				writer.println(i);
+				String temp = (count == 15) ? "" : ", ";
+				System.out.print("F" + (count++) + "=" + i + temp);
+				
 			}
+			System.out.println("]");
 			writer.close();
 		} catch (IOException x) {
 		    System.err.format("IOException: %s%n", x);
@@ -346,25 +356,27 @@ public class Sim {
 		try{
 			PrintWriter writer = new PrintWriter(file, "UTF-8");
 
-
-				
 			if (thread == Processor.THREAD_0){
 				totalInstructionCount = InstructionQueue.instCount_0;
 				for (int i : InstructionQueue.writeBackCC_0){
 					totalCycleCount = Math.max(totalCycleCount, i);
 				}
+				System.out.print("CPI for thread 0: ");
 			}
 			else if (thread == Processor.THREAD_1){
 				totalInstructionCount = InstructionQueue.instCount_1;
 				for (int i : InstructionQueue.writeBackCC_1){
 					totalCycleCount = Math.max(totalCycleCount, i);
 				}
+				System.out.print("CPI for thread 1: ");
 			}
 			else{
 				System.out.println("Attempted access instructions of an undefined thread! EXITING!");
 				System.exit(0);
 			}
-			writer.println(Float.toString((float)(totalCycleCount/totalInstructionCount)));
+			writer.println(Float.toString((float)((float)totalCycleCount/(float)totalInstructionCount)));
+			System.out.println(totalCycleCount + "/" + totalInstructionCount
+					+ " = " + Float.toString((float)((float)totalCycleCount/(float)totalInstructionCount)));
 			writer.close();
 		} catch (IOException x) {
 		    System.err.format("IOException: %s%n", x);

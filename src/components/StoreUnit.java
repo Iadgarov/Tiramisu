@@ -47,16 +47,19 @@ public class StoreUnit {
 		
 		float result = 0;
 		if (thread == Processor.THREAD_0)
-			if (command == Instruction.LD)
+			if (command == Instruction.ST)
 				result = Processor.registers_0.getRegisters()[dst];
 			else {
-				System.out.println("NONE LOAD COMMAND SENT TO LOAD UNIT!! EXITING");
+				System.out.println("NONE STORE COMMAND SENT TO LOAD UNIT!! : " 
+						+ reservationStations.instructions[stationNumber] + "EXITING");
 				System.exit(0);
 			}
 		
 		
 		//write result to CDB, along with who calculated it
-		CDB.writeToCDB( result, null, Processor.CC + executionDelay, reservationStations.immediate[stationNumber]);
+		Tag tag =  new Tag (ReservationStation.STORE_REPOSITORY, 
+				stationNumber, thread, reservationStations.instructions[stationNumber]);
+		CDB.writeToCDB( result, tag, Processor.CC + executionDelay, reservationStations.immediate[stationNumber]);
 
 
 	}
@@ -110,7 +113,7 @@ public class StoreUnit {
 			
 			// We have an instruction and a unit willing to run it
 			// Mark this CC as the CC that this command started execution
-			Instruction inst = AddUnit.reservationStations.instructions[freeInstructionIndex];
+			Instruction inst = reservationStations.instructions[freeInstructionIndex];
 			if (inst.getThread() == Processor.THREAD_0){
 				
 				if (InstructionQueue.issueCC_0[inst.getqLocation()] >= Processor.CC)

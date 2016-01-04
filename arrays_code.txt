@@ -1,0 +1,66 @@
+# A is in 44-49
+# B is in 50-55
+# C is in 56-61
+
+### original arrays ###
+A = {16237.706, -1.437056E-4, -1.8920372E-10,
+	2.0553334, 5.8881516E-18, 1.7833431E-31}
+
+B = {-1.01799406E-17, 5.8355107E-15, -3.2968812,
+	-2.3447112E30, -1.0034291E-15, 1.8711848E-25}
+
+C = {2.2234923E23, -7.227222E-26, -9.443737E-12,
+	7.330803E35, 3.810736E-11, -1.4118285E-26}
+
+# thread 0 takes indices 0, 2, 4
+# thread 1 takes indices 1, 3, 5
+
+### first iteration ###
+0. ld f1 44	# f1 = A[0]
+1. ld f1 45	# f1 = A[1]
+2. ld f2 50	# f2 = B[0]
+3. ld f2 51	# f2 = B[1]
+4. mul f4 f2 f1	# f4 = f1 * f2
+5. mul f4 f2 f1	# f4 = f1 * f2
+6. st f4 44	# A[0] = f4
+7. st f4 45	# A[1] = f4
+8. ld f3 56	# f3 = C[0]
+9. ld f3 57	# f3 = C[1]
+10. add f5 f4 f3	# f5 = f4 + f3
+11. add f5 f4 f3	# f5 = f4 + f3
+12. st f5 56	# C[0] = f5
+13. st f5 57	# C[1] = f5
+
+### second iteration ###
+14. ld f1 46 	# f1 = A[2]
+15. ld f1 47	# f1 = A[3]
+16. ld f2 52	# f2 = B[2]
+17. ld f2 53	# f2 = B[3]
+18. mul f4 f2 f1	# f4 = f1 * f2
+19. mul f4 f2 f1	# f4 = f1 * f2
+20. st f4 46	# A[2] = f4
+21. st f4 47	# A[3] = f4
+22. ld f3 58	# f3 = C[2]
+23. ld f3 59	# f3 = C[3]
+24. add f5 f4 f3	# f5 = f4 + f3
+25. add f5 f4 f3	# f5 = f4 + f3
+26. st f5 58	# C[2] = f5
+27. st f5 59	# C[3] = f5
+
+### third iteration ###
+28. ld f1 48	# f1 = A[4]
+29. ld f1 49	# f1 = A[5]
+30. ld f2 54	# f2 = B[4]
+31. ld f2 55	# f2 = B[5]
+32. mul f4 f2 f1	# f4 = f1 * f2
+33. mul f4 f2 f1	# f4 = f1 * f2
+34. st f4 48	# A[4] = f4
+35. st f4 49	# A[5] = f4
+36. ld f3 60	# f3 = C[4]
+37. ld f3 61	# f3 = C[5]
+38. add f5 f4 f3	# f5 = f4 + f3
+39. add f5 f4 f3	# f5 = f4 + f3
+40. st f5 60	# C[4] = f5
+41. st f5 61	# C[5] = f5
+42. halt
+43. halt

@@ -50,7 +50,8 @@ public class LoadUnit {
 		if (command == Instruction.LD)
 			result = Processor.memory.get(reservationStations.immediate[stationNumber]);
 		else {
-			System.out.println("NONE LOAD COMMAND SENT TO LOAD UNIT!! EXITING");
+			System.out.println("NONE LOAD COMMAND SENT TO LOAD UNIT!! : " 
+		+ reservationStations.instructions[stationNumber] + "\nEXITING");
 			System.exit(0);
 		}
 		
@@ -108,7 +109,7 @@ public class LoadUnit {
 			
 			// We have an instruction and a unit willing to run it
 			// Mark this CC as the CC that this command started execution
-			Instruction inst = AddUnit.reservationStations.instructions[freeInstructionIndex];
+			Instruction inst = reservationStations.instructions[freeInstructionIndex];
 			if (inst.getThread() == Processor.THREAD_0){
 				
 				if (InstructionQueue.issueCC_0[inst.getqLocation()] >= Processor.CC)

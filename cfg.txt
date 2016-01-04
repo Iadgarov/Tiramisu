@@ -1,6 +1,6 @@
 add_nr = 2
 mul_nr = 2
-add_delay = 2
+add_delay = 4
 mul_delay = 8
 mem_delay = 10
 add_nr_reservation = 2

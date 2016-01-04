@@ -112,7 +112,7 @@ public class CDB {
 				//System.out.println("Multers all busy? " + Processor.multUnits.isFullyBusy());
 				
 			
-				// if not a STORE command, update the others
+				// if NOT a STORE command, update the others (STORE does not return a result)
 				if (tag.getStation() != ReservationStation.STORE_REPOSITORY){
 					
 					// First the reservation stations:
@@ -133,7 +133,7 @@ public class CDB {
 					
 				}
 				// STORE command, update the memory
-				else if(tag.getStation() == ReservationStation.LOAD_REPOSITORY){
+				else if(tag.getStation() == ReservationStation.STORE_REPOSITORY){
 					int address = commitWhere.get(i);
 					updateMemory(result, tag, address, i);	// STORE updating the memory
 					
