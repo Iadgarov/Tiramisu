@@ -1,34 +1,33 @@
 package components;
 
+import support.Instruction;
+import support.Tag;
+
+/**
+ * Individual ADD/SUB unit class
+ * @author David
+ *
+ */
 public class AddUnit{
 	
 	static int executionDelay;
-	static int reservationStationNumber;
 	private boolean busy[];
-	static ReservationStation reservationStations;
+	public static ReservationStation reservationStations;
 	
 	/**
 	 * construct a ADD/SUB unit
+	 * Gives each unit a "busy" array so we know what CC's it's working 
 	 */
 	public AddUnit() {
 		
 		this.busy = new boolean[Processor.MAX_MEMORY_SIZE];
 		for (int i = 0; i < Processor.MAX_MEMORY_SIZE; i++)
 			this.busy[i] = false; // all stations start as available at first
-		AddUnit.reservationStations = createStations();
+		
 		
 	}
 
-	/**
-	 * construct reservation stations for all ADD/SUB units
-	 * @return	reservation stations Object of correct size for ADD/SUB unit
-	 */
-	private ReservationStation createStations() {
-		
-		int temp = reservationStationNumber;
-		return new ReservationStation(temp, ReservationStation.ADD_REPOSITORY);
-		
-	}
+
 
 	/**
 	 * Doing the actual calculation (what happens once a command enters a unit from the station)
@@ -37,13 +36,13 @@ public class AddUnit{
 	 */
 	public void execute(int stationNumber) {
 		
-		System.out.println("[CC = " + Processor.CC + "] Exe start for  " + reservationStations.instructions[stationNumber].toString() );
+		System.out.println("[CC = " + Processor.CC + "] Exe start for  " + getReservationStations().getInstructions()[stationNumber].toString() );
 
 		
-		int thread = reservationStations.instructions[stationNumber].getThread(); // thread this command belongs to
-		int command = reservationStations.opCode[stationNumber];
-		float src0 = reservationStations.Vj[stationNumber];
-		float src1 = reservationStations.Vk[stationNumber];
+		int thread = getReservationStations().getInstructions()[stationNumber].getThread(); // thread this command belongs to
+		int command = getReservationStations().opCode[stationNumber];
+		float src0 = getReservationStations().Vj[stationNumber];
+		float src1 = getReservationStations().Vk[stationNumber];
 		//int destinationRegister = reservationStations.instructions[stationNumber].getDst();
 		
 		for (int i = 0; i < executionDelay; i++)
@@ -62,22 +61,22 @@ public class AddUnit{
 	
 		//write result to CDB, along with who calculated it
 		Tag tag = new Tag (ReservationStation.ADD_REPOSITORY, stationNumber, 
-				thread, reservationStations.instructions[stationNumber]);
+				thread, getReservationStations().getInstructions()[stationNumber]);
 		CDB.writeToCDB( result, tag, Processor.CC + executionDelay);
 		
 	}
 	
 	/**
-	 * attempt to accept new command into the reservation station
+	 * attempt to accept new command into the reservation station. Accepts if there is room in station.
 	 * @param inst the instruction we want to our station
 	 * @param thread the thread the instruction belongs to
 	 * @return True if successful, else false
 	 */
 	public static boolean acceptIntoStation(Instruction inst, int thread){
 		
-		if(!reservationStations.isFull()){
+		if(!getReservationStations().isFull()){
 			
-			reservationStations.addInstruction(inst, thread);
+			getReservationStations().addInstruction(inst, thread);
 			return true;
 		}
 		
@@ -85,11 +84,23 @@ public class AddUnit{
 	}
 	
 	/**
-	 * is this unit busy?
+	 * is this unit busy this CC?
 	 * @return true if station is working, else false
 	 */
 	public boolean isBusy(int now){
 		return this.busy[now];
+	}
+
+
+
+	public static ReservationStation getReservationStations() {
+		return reservationStations;
+	}
+
+
+
+	public static void setReservationStations(ReservationStation reservationStations) {
+		AddUnit.reservationStations = reservationStations;
 	}
 
 

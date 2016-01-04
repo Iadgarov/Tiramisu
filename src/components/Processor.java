@@ -4,8 +4,14 @@ package components;
 import java.util.ArrayList;
 import java.util.Queue;
 
+import collections.Adders;
+import collections.Multers;
+import collections.RegisterCollection;
+import main.Sim;
+import support.Instruction;
+
 /**
- * Main processor class
+ * Main processor class. Holds many variables and not much more.
  * @author David
  *
  */
@@ -60,7 +66,7 @@ public class Processor {
 		
 		//super();
 		
-		Processor.memory = Sim.memory;
+		Processor.memory = Sim.getMemory();
 		Processor.instructionQ = new InstructionQueue( instructionQ_0, instructionQ_1);
 
 		LoadUnit.reservationStationNumber = storeBufferNumber;
@@ -75,11 +81,11 @@ public class Processor {
 
 		
 		AddUnit.executionDelay = addUnitDelay;
-		AddUnit.reservationStationNumber = addReservationStationNumber;
+		Adders.setReservationStationNumber(addReservationStationNumber);
 		addUnits = new Adders(addUnitNumber);
 		
 		MultUnit.executionDelay = multUnitDelay;
-		MultUnit.reservationStationNumber = multReservationStationNumber;
+		Multers.setReservationStationNumber(multReservationStationNumber);
 		multUnits = new Multers(multUnitNumber);
 		
 		

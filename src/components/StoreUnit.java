@@ -1,27 +1,31 @@
 package components;
 
+import support.Instruction;
+import support.Tag;
+
 public class StoreUnit {
 	
 	static int executionDelay;
 	static int reservationStationNumber;
 	private static boolean busy[];
-	static ReservationStation reservationStations;
+	private static ReservationStation reservationStations;
 	
 	/**
 	 * construct a LOAD unit
+	 * initiate its reservation station (buffer) creation
 	 */
 	public StoreUnit() {
 		
 		busy = new boolean[Processor.MAX_MEMORY_SIZE];
 		for (int i = 0; i < Processor.MAX_MEMORY_SIZE; i++)
 			busy[i] = false; // all stations start as available at first
-		StoreUnit.reservationStations = createStations();
+		StoreUnit.setReservationStations(createStations());
 		
 	}
 
 	/**
-	 * construct reservation stations for all LOAD units
-	 * @return	reservation stations Object of correct size for LOAD unit
+	 * construct reservation stations for all STORE units
+	 * @return	reservation stations Object of correct size for STORE unit
 	 */
 	private ReservationStation createStations() {
 		
@@ -37,9 +41,9 @@ public class StoreUnit {
 	 */
 	public static void execute(int stationNumber) {
 		
-		int thread = reservationStations.instructions[stationNumber].getThread(); // thread this command belongs to
-		int command = reservationStations.opCode[stationNumber];
-		int dst = reservationStations.instructions[stationNumber].getDst();
+		int thread = getReservationStations().getInstructions()[stationNumber].getThread(); // thread this command belongs to
+		int command = getReservationStations().opCode[stationNumber];
+		int dst = getReservationStations().getInstructions()[stationNumber].getDst();
 		
 		for (int i = 0; i < executionDelay; i++)
 			busy[Processor.CC + i] = true; // this unit will be working for these CC's
@@ -50,39 +54,39 @@ public class StoreUnit {
 			if (command == Instruction.ST)
 				result = Processor.registers_0.getRegisters()[dst];
 			else {
-				System.out.println("NONE STORE COMMAND SENT TO LOAD UNIT!! : " 
-						+ reservationStations.instructions[stationNumber] + "EXITING");
+				System.out.println("NONE STORE COMMAND SENT TO STORE UNIT!! : " 
+						+ getReservationStations().getInstructions()[stationNumber] + "EXITING");
 				System.exit(0);
 			}
 		
 		
-		//write result to CDB, along with who calculated it
+		//write result to CDB, along with who calculated it and address since this is a LOAD command
 		Tag tag =  new Tag (ReservationStation.STORE_REPOSITORY, 
-				stationNumber, thread, reservationStations.instructions[stationNumber]);
-		CDB.writeToCDB( result, tag, Processor.CC + executionDelay, reservationStations.immediate[stationNumber]);
+				stationNumber, thread, getReservationStations().getInstructions()[stationNumber]);
+		CDB.writeToCDB( result, tag, Processor.CC + executionDelay, getReservationStations().immediate[stationNumber]);
 
 
 	}
 	
 	/**
-	 * attempt to accept new command into the reservation station
+	 * attempt to accept new command into the reservation station. If there is room we will succeed. 
 	 * @param inst the instruction we want to our station
 	 * @param thread the thread the instruction belongs to
 	 * @return True if successful, else false
 	 */
 	public static boolean acceptIntoStation(Instruction inst, int thread){
 		
-		if(!reservationStations.isFull()){
+		if(!getReservationStations().isFull()){
 			
-			reservationStations.addInstruction(inst, thread);
+			getReservationStations().addInstruction(inst, thread);
 			return true;
 		}
 		
-		return false; // if you got here then there was no room in the station or you F'd up in some other way
+		return false; // if you got here then there was no room in the station or I F****d up in some other way
 	}
 	
 	/**
-	 * is this unit busy?
+	 * is this unit busy during this CC?
 	 * @return true if station is working, else false
 	 */
 	public static boolean isBusy(int now){
@@ -100,7 +104,7 @@ public class StoreUnit {
 		
 		int freeInstructionIndex;;	// index of reservation station that we want
 		
-		while ((freeInstructionIndex = reservationStations.isReadyIndex()) != -1){
+		while ((freeInstructionIndex = getReservationStations().isReadyIndex()) != -1){
 				
 			
 			if (freeInstructionIndex == -1)
@@ -113,25 +117,33 @@ public class StoreUnit {
 			
 			// We have an instruction and a unit willing to run it
 			// Mark this CC as the CC that this command started execution
-			Instruction inst = reservationStations.instructions[freeInstructionIndex];
+			Instruction inst = getReservationStations().getInstructions()[freeInstructionIndex];
 			if (inst.getThread() == Processor.THREAD_0){
 				
-				if (InstructionQueue.issueCC_0[inst.getqLocation()] >= Processor.CC)
+				if (InstructionQueue.getIssueCC_0()[inst.getqLocation()] >= Processor.CC)
 					return; // it was just issued, wait another cycle at least
 				
-				InstructionQueue.exeCC_0[inst.getqLocation()] = Processor.CC;
+				InstructionQueue.getExeCC_0()[inst.getqLocation()] = Processor.CC;
 			}
 			else if (inst.getThread() == Processor.THREAD_1){
 				
-				if (InstructionQueue.issueCC_1[inst.getqLocation()] >= Processor.CC)
+				if (InstructionQueue.getIssueCC_1()[inst.getqLocation()] >= Processor.CC)
 					return; // it was just issued, wait another cycle at least
 				
-				InstructionQueue.exeCC_1[inst.getqLocation()] = Processor.CC;
+				InstructionQueue.getExeCC_1()[inst.getqLocation()] = Processor.CC;
 			}
 			
-			reservationStations.inExecution[freeInstructionIndex] = true;	// this instruction has started execution
+			getReservationStations().getInExecution()[freeInstructionIndex] = true;	// this instruction has started execution
 			execute(freeInstructionIndex);	
 		}
+	}
+
+	public static ReservationStation getReservationStations() {
+		return reservationStations;
+	}
+
+	public static void setReservationStations(ReservationStation reservationStations) {
+		StoreUnit.reservationStations = reservationStations;
 	}
 
 }

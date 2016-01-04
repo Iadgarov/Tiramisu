@@ -2,7 +2,10 @@ package components;
 
 import java.util.ArrayList;
 
+import collections.RegisterCollection;
 import components.Processor;
+import support.Instruction;
+import support.Tag;
 /**
  * Reservation station class
  * @author David
@@ -20,15 +23,15 @@ public class ReservationStation {
 	
 
 	private int size;
-	Instruction[] instructions;
-	// INSERT FUNCTION TO SET ALL SPOTS TO EMPTY
+	private Instruction[] instructions;
+	
 	int opCode[];
 	Float Vj[], Vk[];
 	Tag Qj[], Qk[];
 	int immediate[];
 	int thread[]; 			// which thread sent this instruction?
 	int acceptedWhen[]; 	// CC that this got into the station
-	boolean inExecution[];	// did we already push this to unit? Don't want to push something twice..
+	private boolean inExecution[];	// did we already push this to unit? Don't want to push something twice..
 	int type;				// ADD/SUB station or MULT/DIV station?
 	
 	private int entryNumber = 0;
@@ -42,7 +45,7 @@ public class ReservationStation {
 		this.size = size;
 		this.type = type;
 		
-		this.instructions = new Instruction[size];
+		this.setInstructions(new Instruction[size]);
 		this.opCode = new int[size];
 		
 		// initialize all stations to empty
@@ -64,9 +67,9 @@ public class ReservationStation {
 		this.acceptedWhen = new int[size];
 		
 		// Executing or not?
-		this.inExecution = new boolean[size];
+		this.setInExecution(new boolean[size]);
 		for (int i = 0; i < size; i++)
-			this.inExecution[i] = false;	// set inital state
+			this.getInExecution()[i] = false;	// set inital state
 		
 		// Which thread?
 		this.thread = new int[size];
@@ -87,14 +90,14 @@ public class ReservationStation {
 			System.exit(0);
 		}
 		
-		
+		// was useful for testing at one point. I shall leave it as a memorial to the good times
 		if (inst.getThread() != thread)
 			System.out.println("SOMETHING IS WRONG! Instruction: " + inst.toString() + 
 					" thinks thread is " + inst.getThread() + 
 					" But thread is " + thread);
 			
 		this.opCode[insertHere] = inst.getOpCode();
-		this.instructions[insertHere] = inst;
+		this.getInstructions()[insertHere] = inst;
 		this.immediate[insertHere] = inst.getImmidiate();
 		this.acceptedWhen[insertHere] = entryNumber++;
 		
@@ -138,6 +141,7 @@ public class ReservationStation {
 	
 	/**
 	 * Tells us if there is room in this station for more commands
+	 * Uses emptySpotIndex method, compared its result to -1
 	 * @return true if full, false otherwise
 	 */
 	public boolean isFull (){
@@ -162,6 +166,7 @@ public class ReservationStation {
 	/**
 	 * gets the index of a command that is in the station and ready to be executed
 	 * If there are several, choose the one with the smallest issue CC!!!
+	 * Why? because for some reason I thought it was smart at the time. meh..
 	 * @return index of instruction that is ready to be executed, -1 if no such instruction exists
 	 */
 	public int isReadyIndex(){
@@ -174,16 +179,16 @@ public class ReservationStation {
 			
 			// if the values are ready and the pointers are not pointing then command is ready
 			if (this.Vj[i] != null && this.Vk[i] != null
-					&& this.Qj[i] == null && this.Qk[i] == null && !this.inExecution[i])
+					&& this.Qj[i] == null && this.Qk[i] == null && !this.getInExecution()[i])
 				temp.add(i);
 			
 			// a Load command is always ready in our case
-			if (this.opCode[i] == Instruction.LD && !this.inExecution[i])
+			if (this.opCode[i] == Instruction.LD && !this.getInExecution()[i])
 				temp.add(i);
 			
 			// a Store command only needs src1
 			if (this.Vj[i] != (Float)null && this.Qj[i] == null && 
-					this.opCode[i] == Instruction.ST && !this.inExecution[i])
+					this.opCode[i] == Instruction.ST && !this.getInExecution()[i])
 				temp.add(i);
 		}
 		
@@ -215,6 +220,10 @@ public class ReservationStation {
 		
 	}
 	
+	/**
+	 * Converts a reservation station to a string
+	 * Used for debugging
+	 */
 	public String toString(){
 		
 		String returnMe = "";
@@ -223,7 +232,7 @@ public class ReservationStation {
 		
 		for (int i = 0; i < this.size; i++){
 			returnMe += "[Line " + i + "]: ";
-			if (this.instructions[i] == null)
+			if (this.getInstructions()[i] == null)
 				returnMe += "NULL\n";
 			else{
 				
@@ -233,12 +242,32 @@ public class ReservationStation {
 				if ( this.Qk[i] != null){
 					b = this.Qk[i].toString();
 				}
-				returnMe += this.instructions[i].toString() + " Needs: \n" + a + "\n" + b ;
+				returnMe += this.getInstructions()[i].toString() + " Needs: \n" + a + "\n" + b ;
 				
 			}
 		}
 		return returnMe;
 		
+	}
+
+
+	public Instruction[] getInstructions() {
+		return instructions;
+	}
+
+
+	public void setInstructions(Instruction[] instructions) {
+		this.instructions = instructions;
+	}
+
+
+	public boolean[] getInExecution() {
+		return inExecution;
+	}
+
+
+	public void setInExecution(boolean inExecution[]) {
+		this.inExecution = inExecution;
 	}
 	
 

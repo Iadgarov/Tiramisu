@@ -1,11 +1,14 @@
 package components;
 
+import support.Instruction;
+import support.Tag;
+
 public class LoadUnit {
 	
 	static int executionDelay;
 	static int reservationStationNumber;
 	private static boolean busy[];
-	static ReservationStation reservationStations;
+	private static ReservationStation reservationStations;
 	
 	/**
 	 * construct a LOAD unit
@@ -16,7 +19,7 @@ public class LoadUnit {
 		busy = new boolean[Processor.MAX_MEMORY_SIZE];
 		for (int i = 0; i < Processor.MAX_MEMORY_SIZE; i++)
 			busy[i] = false; // all stations start as available at first
-		LoadUnit.reservationStations = createStations();
+		LoadUnit.setReservationStations(createStations());
 		
 	}
 
@@ -38,8 +41,8 @@ public class LoadUnit {
 	 */
 	public static void execute(int stationNumber) {
 		
-		int thread = reservationStations.instructions[stationNumber].getThread(); // thread this command belongs to
-		int command = reservationStations.opCode[stationNumber];
+		int thread = getReservationStations().getInstructions()[stationNumber].getThread(); // thread this command belongs to
+		int command = getReservationStations().opCode[stationNumber];
 
 		
 		for (int i = 0; i < executionDelay; i++)
@@ -48,16 +51,16 @@ public class LoadUnit {
 		
 		float result = 0;
 		if (command == Instruction.LD)
-			result = Processor.memory.get(reservationStations.immediate[stationNumber]);
+			result = Processor.memory.get(getReservationStations().immediate[stationNumber]);
 		else {
 			System.out.println("NONE LOAD COMMAND SENT TO LOAD UNIT!! : " 
-		+ reservationStations.instructions[stationNumber] + "\nEXITING");
+		+ getReservationStations().getInstructions()[stationNumber] + "\nEXITING");
 			System.exit(0);
 		}
 		
 		//write result to CDB, along with who calculated it
 		CDB.writeToCDB( result, new Tag (ReservationStation.LOAD_REPOSITORY, 
-				stationNumber, thread, reservationStations.instructions[stationNumber]),
+				stationNumber, thread, getReservationStations().getInstructions()[stationNumber]),
 				Processor.CC + executionDelay);
 	}
 	
@@ -69,9 +72,9 @@ public class LoadUnit {
 	 */
 	public static boolean acceptIntoStation(Instruction inst, int thread){
 		
-		if(!reservationStations.isFull()){
+		if(!getReservationStations().isFull()){
 			
-			reservationStations.addInstruction(inst, thread);
+			getReservationStations().addInstruction(inst, thread);
 			return true;
 		}
 		
@@ -95,7 +98,7 @@ public class LoadUnit {
 		// find instruction that is ready to be pushed
 		int freeInstructionIndex;	// index of reservation station that we want
 		
-		while ((freeInstructionIndex = reservationStations.isReadyIndex()) != -1){
+		while ((freeInstructionIndex = getReservationStations().isReadyIndex()) != -1){
 			
 			if (freeInstructionIndex == -1)
 				return; // nothing to push, no commands are ready
@@ -109,25 +112,33 @@ public class LoadUnit {
 			
 			// We have an instruction and a unit willing to run it
 			// Mark this CC as the CC that this command started execution
-			Instruction inst = reservationStations.instructions[freeInstructionIndex];
+			Instruction inst = getReservationStations().getInstructions()[freeInstructionIndex];
 			if (inst.getThread() == Processor.THREAD_0){
 				
-				if (InstructionQueue.issueCC_0[inst.getqLocation()] >= Processor.CC)
+				if (InstructionQueue.getIssueCC_0()[inst.getqLocation()] >= Processor.CC)
 					return; // it was just issued, wait another cycle at least
 				
-				InstructionQueue.exeCC_0[inst.getqLocation()] = Processor.CC;
+				InstructionQueue.getExeCC_0()[inst.getqLocation()] = Processor.CC;
 			}
 			else if (inst.getThread() == Processor.THREAD_1){
 				
-				if (InstructionQueue.issueCC_1[inst.getqLocation()] >= Processor.CC)
+				if (InstructionQueue.getIssueCC_1()[inst.getqLocation()] >= Processor.CC)
 					return; // it was just issued, wait another cycle at least
 				
-				InstructionQueue.exeCC_1[inst.getqLocation()] = Processor.CC;
+				InstructionQueue.getExeCC_1()[inst.getqLocation()] = Processor.CC;
 			}
 			
-			reservationStations.inExecution[freeInstructionIndex] = true;	// this instruction has started execution
+			getReservationStations().getInExecution()[freeInstructionIndex] = true;	// this instruction has started execution
 			execute(freeInstructionIndex);	
 		}
+	}
+
+	public static ReservationStation getReservationStations() {
+		return reservationStations;
+	}
+
+	public static void setReservationStations(ReservationStation reservationStations) {
+		LoadUnit.reservationStations = reservationStations;
 	}
 
 }
