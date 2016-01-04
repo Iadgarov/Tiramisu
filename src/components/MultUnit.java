@@ -16,7 +16,7 @@ public class MultUnit{
 	
 	
 	/**
-	 * construct a MUL/DIV unit
+	 * construct a MUL/DIV unit<br>
 	 * Gives each unit a "busy" array so we know what CC's it's working 
 	 */
 	public MultUnit() {
@@ -89,6 +89,7 @@ public class MultUnit{
 	
 	/**
 	 * is this station busy this CC?
+	 * @param now the CC we are checking
 	 * @return true if station is working, else false
 	 */
 	public boolean isBusy(int now){

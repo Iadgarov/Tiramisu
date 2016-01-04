@@ -40,6 +40,7 @@ public class ReservationStation {
 	/**
 	 * Constructor for a reservation station
 	 * @param size number of lines/spots in the station
+	 * @param type the type of station we want (what unit is this a station for?)
 	 */
 	public ReservationStation(int size, int type){
 		this.size = size;
@@ -77,10 +78,11 @@ public class ReservationStation {
 	
 	
 	/**
-	 * Add new instruction to station.
-	 * Should only be called if there is room in the station
+	 * Add new instruction to station.<br>
+	 * Should only be called if there is room in the station<br>
 	 * Empty spot has an EMPTY instruction
 	 * @param inst the new instruction object to be injected into the station
+	 * @param thread the thread to whom the instruction belongs
 	 */
 	public void addInstruction (Instruction inst, int thread){
 		
@@ -140,7 +142,7 @@ public class ReservationStation {
 	}
 	
 	/**
-	 * Tells us if there is room in this station for more commands
+	 * Tells us if there is room in this station for more commands<br>
 	 * Uses emptySpotIndex method, compared its result to -1
 	 * @return true if full, false otherwise
 	 */
@@ -164,8 +166,8 @@ public class ReservationStation {
 	}
 	
 	/**
-	 * gets the index of a command that is in the station and ready to be executed
-	 * If there are several, choose the one with the smallest issue CC!!!
+	 * gets the index of a command that is in the station and ready to be executed<br>
+	 * If there are several, choose the one with the smallest issue CC!!!<br>
 	 * Why? because for some reason I thought it was smart at the time. meh..
 	 * @return index of instruction that is ready to be executed, -1 if no such instruction exists
 	 */

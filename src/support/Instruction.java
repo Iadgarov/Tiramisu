@@ -25,7 +25,7 @@ public class Instruction {
 	//private int currentExeCC; // how many CC's have we already spent in the execution?
 	
 	/**
-	 * Takes command line string from memory array and converts it into an instruction.
+	 * Takes command line string from memory array and converts it into an instruction.<br>
 	 * Initiates various fields based on data from memory
 	 * @param commandLine a line in binary, 32 bits, parse this into a command
 	 */

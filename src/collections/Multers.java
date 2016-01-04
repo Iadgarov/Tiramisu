@@ -16,9 +16,9 @@ public class Multers {
 	private static int reservationStationNumber;
 
 	/**
-	 * Set MULT/DIV unit amount
-	 * Construct the list of MULT/DIV units. 
-	 * initiate reservation station construction for units
+	 * Set MULT/DIV unit amount<br>
+	 * Construct the list of MULT/DIV units. <br>
+	 * initiate reservation station construction for units<br>
 	 * @param multUnitNumber	number of said units
 	 */
 	public Multers(int multUnitNumber){
@@ -64,8 +64,8 @@ public class Multers {
 	
 
 	/**
-	 * search reservation stations for commands that can begin execution
-	 * search for unit that can accept command (not busy)
+	 * search reservation stations for commands that can begin execution<br>
+	 * search for unit that can accept command (not busy)<br>
 	 * start execution of command in the unit if both are ready 
 	 */
 	public static void attemptPushToUnit() {

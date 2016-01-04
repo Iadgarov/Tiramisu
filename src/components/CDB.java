@@ -23,13 +23,13 @@ public class CDB {
 	
 	
 	/**
-	 * This method commits results from our calculations to the stations and registers once the time is right.
-	 * Execution result is sent to the CDB right away. 
-	 * The CDB is responsible to only broadcast it once the execution delay has passed. 
-	 * But why write it this way? meh.. made sense at the time.
+	 * This method commits results from our calculations to the stations and registers once the time is right.<br>
+	 * Execution result is sent to the CDB right away. <br>
+	 * The CDB is responsible to only broadcast it once the execution delay has passed. <br>
+	 * But why write it this way? meh.. made sense at the time.<br>
 	 * Once a result has been broadcasted this means we can remove the relevant command from the relevant station and make
-	 * room for a new one. 
-	 * Tells all reservation stations what value is being broadcasted and by whom should they want it
+	 * room for a new one. <br>
+	 * Tells all reservation stations what value is being broadcasted and by whom should they want it<br>
 	 * Commits the first instruction that matches this CC for each unit type
 	 * 
 	 */
@@ -175,7 +175,7 @@ public class CDB {
 	
 	
 	/**
-	 * gets calculation result and who sent it. Places commit request into the list
+	 * gets calculation result and who sent it. Places commit request into the list <br>
 	 * Once the correct CC comes the data will be committed. See commit method documentation
 	 * @param result data that was calculated
 	 * @param tag	who sent the data, if from STORE station write to MEM instead

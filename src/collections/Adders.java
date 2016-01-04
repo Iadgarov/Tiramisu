@@ -23,9 +23,9 @@ public class Adders {
 	private static int reservationStationNumber;
 
 	/**
-	 * Constructor for ADD/SUB unit collection
-	 * Initiate unit amount and creates the unit objects
-	 * Initiate reservtion station creation for ADD/SUB units
+	 * Constructor for ADD/SUB unit collection<br>
+	 * Initiate unit amount and creates the unit objects<br>
+	 * Initiate reservtion station creation for ADD/SUB units<br>
 	 * @param unitNumber	how many units?
 	 */
 	public Adders(int unitNumber){
@@ -36,8 +36,8 @@ public class Adders {
 	}
 	
 	/**
-	 * Checks if all ADD/SUB units are busy in this CC
-	 * Uses freeUnitIndex method to do so (compares its result to -1)
+	 * Checks if all ADD/SUB units are busy in this CC<br>
+	 * Uses freeUnitIndex method to do so (compares its result to -1)<br>
 	 * @return true if all units are busy
 	 */
 	public boolean isFullyBusy(){
@@ -45,7 +45,7 @@ public class Adders {
 	}
 	
 	/**
-	 * Go over all ADD/SUB units and return index of a free unit if it exists.
+	 * Go over all ADD/SUB units and return index of a free unit if it exists.<br>
 	 * @return index of free ADD/SUB unit or -1 is all are busy
 	 */
 	public static int freeUnitIndex(){
@@ -59,7 +59,7 @@ public class Adders {
 	}
 	
 	/**
-	 * This method initializes all ADD/SUB units for the processor. 
+	 * This method initializes all ADD/SUB units for the processor. <br>
 	 * Called by the constructor
 	 * 
 	 * @param addUnitNumber	number of units to construct
@@ -90,8 +90,8 @@ public class Adders {
 
 	
 	/**
-	 * search reservation stations for commands that can begin execution
-	 * search for available unit.
+	 * search reservation stations for commands that can begin execution<br>
+	 * search for available unit.<br>
 	 * If both found begin execution of the command in the unit
 	 */
 	public static void attemptPushToUnit() {

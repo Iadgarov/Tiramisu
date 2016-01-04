@@ -15,7 +15,7 @@ public class AddUnit{
 	public static ReservationStation reservationStations;
 	
 	/**
-	 * construct a ADD/SUB unit
+	 * construct a ADD/SUB unit<br>
 	 * Gives each unit a "busy" array so we know what CC's it's working 
 	 */
 	public AddUnit() {
@@ -30,7 +30,7 @@ public class AddUnit{
 
 
 	/**
-	 * Doing the actual calculation (what happens once a command enters a unit from the station)
+	 * Doing the actual calculation (what happens once a command enters a unit from the station) 
 	 * and writing to CDB
 	 * @param stationNumber the line in the reservation station table that holds the to be executed instruction
 	 */
@@ -85,6 +85,7 @@ public class AddUnit{
 	
 	/**
 	 * is this unit busy this CC?
+	 * @param now the CC we are checking
 	 * @return true if station is working, else false
 	 */
 	public boolean isBusy(int now){

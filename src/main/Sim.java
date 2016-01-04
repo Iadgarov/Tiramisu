@@ -144,11 +144,11 @@ public class Sim {
 	}
 	
 	/**
-	 * Simulates the processors run one CC at a time. 
-	 * Runs till all stations are empty and all instruction have been executed and committed to the CDB.
-	 * calls attempt to issue the instructions, up to 4 per cycle.
-	 * calls attempt to being execution
-	 * calls any possible i on the CDB (see CDB documentation) to happen
+	 * Simulates the processors run one CC at a time. <br> 
+	 * Runs till all stations are empty and all instruction have been executed and committed to the CDB. <br>
+	 * calls attempt to issue the instructions, up to 4 per cycle.<br>
+	 * calls attempt to being execution<br>
+	 * calls any possible i on the CDB (see CDB documentation) to happen<br>
 	 * increment the CC and keeps going
 	 */
 	private static void doWork(){
@@ -186,8 +186,8 @@ public class Sim {
 	
 	
 	/**
-	 * An input parser.
-	 * Get parameter data from cfg.txt and save it in variables for later use
+	 * An input parser.<br>
+	 * Get parameter data from cfg.txt and save it in variables for later use<br>
 	 * Or reads the memory file and saves that for later use
 	 * @param whatDo if true then read data for parameters from cfg, if false read memory file
 	 */
@@ -337,7 +337,7 @@ public class Sim {
 	}
 	
 	/**
-	 * Writes the trace of a thread into a file, each line in file is a location in memory
+	 * Writes the trace of a thread into a file, each line in file is a location in memory<br>
 	 * Line consists of operation Hex encoding, issue CC, exe start CC, writeback to CDB CC
 	 * @param file	the path to the file we want to write in
 	 * @param thread the thread we are currently working on

@@ -11,7 +11,7 @@ public class LoadUnit {
 	private static ReservationStation reservationStations;
 	
 	/**
-	 * construct a LOAD unit
+	 * construct a LOAD unit<br>
 	 * Only one should be constructed. No support for more currently 
 	 */
 	public LoadUnit() {
@@ -83,6 +83,7 @@ public class LoadUnit {
 	
 	/**
 	 * is this unit busy?
+	 * @param now the CC we are checking?
 	 * @return true if station is working, else false
 	 */
 	public static boolean isBusy(int now){

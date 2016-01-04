@@ -2,9 +2,12 @@ package support;
 
 
 /**
- * Tag class, append this to data that is written to CDB so we know where it came from
- * (1,j,i) = ADD/SUB reservation station line j thread i
- * (-1,j,i) = MUL/FIV reservation station line j thread i
+ * Tag class, append this to data that is written to CDB so we know where it came from.<br>
+ * 
+ * (1,j,i) = ADD/SUB reservation station line j thread i	<br>
+ * 
+ * (-1,j,i) = MUL/DIV reservation station line j thread i	
+ * 
  * @author David
  *
  */

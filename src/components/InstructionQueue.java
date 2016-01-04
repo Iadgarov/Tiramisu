@@ -5,8 +5,8 @@ import java.util.Queue;
 import support.Instruction;
 
 /**
- * The instruction queue structure. responsible for issuing when possible and keeping track of instructions. 
- * Keeps track of when each instruction was issued/executed/written back
+ * The instruction queue structure. responsible for issuing when possible and keeping track of instructions. <br>
+ * Keeps track of when each instruction was issued/executed/written back<br>
  * Keeps all sorts of data in parameters for convenience
  * @author David
  *
@@ -63,9 +63,9 @@ public class InstructionQueue {
 	
 	
 	/**
-	 * Attempt to issue commands from each thread, if stations are full nothing changes and we keep waiting.
-	 * Issues commands in order. That is if there is a command in thread 1's queue that showed up first in
-	 * the memory compared to the one in thread 0's queue it will be issued first.
+	 * Attempt to issue commands from each thread, if stations are full nothing changes and we keep waiting.<br>
+	 * Issues commands in order. That is if there is a command in thread 1's queue that showed up first in<br>
+	 * the memory compared to the one in thread 0's queue it will be issued first.<br>
 	 * Remember PC for each successful issue.
 	 */
 	public void attemptIssue() {

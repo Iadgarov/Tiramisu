@@ -11,7 +11,7 @@ public class StoreUnit {
 	private static ReservationStation reservationStations;
 	
 	/**
-	 * construct a LOAD unit
+	 * construct a LOAD unit<br>
 	 * initiate its reservation station (buffer) creation
 	 */
 	public StoreUnit() {
@@ -87,6 +87,7 @@ public class StoreUnit {
 	
 	/**
 	 * is this unit busy during this CC?
+	 * @param now	the CC we are checking
 	 * @return true if station is working, else false
 	 */
 	public static boolean isBusy(int now){
