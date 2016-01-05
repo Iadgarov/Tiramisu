@@ -1,5 +1,10 @@
 package support;
 
+/**
+ * Class for the instructions. Each object represents a single instruction.
+ * @author David
+ *
+ */
 public class Instruction {
 	
 	// consts to represent type of command

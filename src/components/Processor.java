@@ -11,7 +11,8 @@ import main.Sim;
 import support.Instruction;
 
 /**
- * Main processor class. Holds many variables and not much more.
+ * Main processor class. Holds many variables and not much more.<br>
+ * Honestly don't really need it.. but hey why not?
  * @author David
  *
  */
@@ -32,9 +33,7 @@ public class Processor {
 	
 	public static Multers multUnits;
 	
-	public static LoadUnit loader;
-	
-	public static StoreUnit storer;
+	public static MemoryUnit memory_er;
 
 	
 	public static RegisterCollection registers_0 = new RegisterCollection(THREAD_0);
@@ -69,18 +68,13 @@ public class Processor {
 		Processor.memory = Sim.getMemory();
 		Processor.instructionQ = new InstructionQueue( instructionQ_0, instructionQ_1);
 
-		LoadUnit.reservationStationNumber = storeBufferNumber;
-		StoreUnit.reservationStationNumber = loadBufferNumber;
+		MemoryUnit.reservationStationNumberSTORE = storeBufferNumber;
+		MemoryUnit.reservationStationNumberLOAD = loadBufferNumber;
+		MemoryUnit.executionDelay = memDelay;
+		memory_er = new MemoryUnit();
 		
-		LoadUnit.executionDelay = memDelay;
-		loader = new LoadUnit();
 		
-		StoreUnit.executionDelay = memDelay;
-		storer = new StoreUnit();
-		
-
-		
-		AddUnit.executionDelay = addUnitDelay;
+		AddUnit.setExecutionDelay(addUnitDelay);
 		Adders.setReservationStationNumber(addReservationStationNumber);
 		addUnits = new Adders(addUnitNumber);
 		

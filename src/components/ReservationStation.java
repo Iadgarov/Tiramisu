@@ -7,7 +7,8 @@ import components.Processor;
 import support.Instruction;
 import support.Tag;
 /**
- * Reservation station class
+ * Reservation station class<br>
+ * Also used to represent Load/Store buffers
  * @author David
  *
  */

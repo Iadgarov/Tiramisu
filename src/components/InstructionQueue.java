@@ -111,8 +111,8 @@ public class InstructionQueue {
 			case Instruction.DIV:;
 			case Instruction.MULT: result = MultUnit.acceptIntoStation(inst, thread); break;
 			
-			case Instruction.LD: result = LoadUnit.acceptIntoStation(inst, thread); break;
-			case Instruction.ST: result = StoreUnit.acceptIntoStation(inst, thread); break;
+			case Instruction.LD: ;
+			case Instruction.ST: result = MemoryUnit.acceptIntoStation(inst, thread); break;
 			
 			case Instruction.NOP:
 				if (thread == Processor.THREAD_0)

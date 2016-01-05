@@ -11,9 +11,10 @@ import support.Tag;
 public class MultUnit{
 	
 	static int executionDelay;
-	private boolean busy[];		// true if station is busy in a specific CC
+	private boolean busy;		// true if station is busy in a specific CC
 	public static ReservationStation reservationStations;
-	
+	private int exeStart; // when execution started so we can free unit when done
+
 	
 	/**
 	 * construct a MUL/DIV unit<br>
@@ -21,10 +22,7 @@ public class MultUnit{
 	 */
 	public MultUnit() {
 		
-		this.busy = new boolean[Processor.MAX_MEMORY_SIZE];
-		for (int i = 0; i < Processor.MAX_MEMORY_SIZE; i++)
-			this.busy[i] = false; // all stations start as available at first
-		
+		this.busy = true;
 	}
 
 
@@ -38,6 +36,7 @@ public class MultUnit{
 		
 		System.out.println("[CC = " + Processor.CC + "] Exe start for  " + getReservationStations().getInstructions()[stationNumber].toString() );
 
+		this.exeStart = Processor.CC;
 		
 		int thread = getReservationStations().getInstructions()[stationNumber].getThread(); // thread this command belongs to
 		int command = getReservationStations().opCode[stationNumber];
@@ -45,9 +44,7 @@ public class MultUnit{
 		float src1 = getReservationStations().Vk[stationNumber];
 		
 		
-		//int t = Processor.CC;
-		for (int i = 0; i < executionDelay; i++)
-			this.busy[Processor.CC + i] = true; // this unit will be working for these CC's
+		setBusy(true);
 		
 		
 		float result = 0;
@@ -70,6 +67,13 @@ public class MultUnit{
 		
 	}
 	
+	public void setBusy(boolean b) {
+		this.busy = b;
+		
+	}
+
+
+
 	/**
 	 * attempt to accept new command into the reservation station, it there is room it succeeds
 	 * @param inst the instruction we want to our station
@@ -89,11 +93,10 @@ public class MultUnit{
 	
 	/**
 	 * is this station busy this CC?
-	 * @param now the CC we are checking
 	 * @return true if station is working, else false
 	 */
-	public boolean isBusy(int now){
-		return this.busy[now];
+	public boolean isBusy(){
+		return this.busy;
 	}
 
 
@@ -106,6 +109,19 @@ public class MultUnit{
 
 	public static void setReservationStations(ReservationStation reservationStations) {
 		MultUnit.reservationStations = reservationStations;
+	}
+
+
+
+	public int getExeStart() {
+		// TODO Auto-generated method stub
+		return this.exeStart;
+	}
+
+
+
+	public static int getExecutionDelay() {
+		return executionDelay;
 	}
 	
 	

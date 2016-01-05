@@ -16,10 +16,9 @@ import collections.RegisterCollection;
 import components.AddUnit;
 import components.CDB;
 import components.InstructionQueue;
-import components.LoadUnit;
+import components.MemoryUnit;
 import components.MultUnit;
 import components.Processor;
-import components.StoreUnit;
 import support.Instruction;
 
 /**
@@ -156,8 +155,8 @@ public class Sim {
 		while (!((CDB.getTotalCommits() == InstructionQueue.getTotalIssues()) &&	// committed everything that was issued
 				 (AddUnit.getReservationStations().isEmpty()) &&				// stations/buffers are empty of commands
 				 (MultUnit.getReservationStations().isEmpty()) &&
-				 (LoadUnit.getReservationStations().isEmpty()) &&
-				 (StoreUnit.getReservationStations().isEmpty()) && 
+				 (MemoryUnit.getReservationStations(Instruction.LD).isEmpty()) &&
+				 (MemoryUnit.getReservationStations(Instruction.ST).isEmpty()) && 
 				 (InstructionQueue.isHalt0()) &&							// reached first halt
 				 (InstructionQueue.isHalt1()))){							// reached second halt
 			
@@ -168,8 +167,10 @@ public class Sim {
 			// Pass any commands that we can to the units
 			Adders.attemptPushToUnit(); 
 			Multers.attemptPushToUnit();
-			LoadUnit.attemptPushToUnit();
-			StoreUnit.attemptPushToUnit();
+			MemoryUnit.attemptPushToUnit(Instruction.LD);
+			MemoryUnit.attemptPushToUnit(Instruction.ST);
+			
+			unitClean();	// release units that are done with execution
 			
 			CDB.commit(); // write back whatever is ready to be written back
 			
@@ -181,6 +182,36 @@ public class Sim {
 		}
 		
 	}
+	
+	/**
+	 * Go through all the execution units and free them if enough cycles have passed to complete
+	 * the execution delay<br>
+	 * Should be called after execution for this CC has been initiated. 
+	 */
+	private static void unitClean(){
+		
+		// ADD/SUB
+		for (int i = 0; i < Adders.addUnitNumber; i++){
+			AddUnit x = Adders.getAddUnits().get(i);
+			if (x.isBusy() && x.getExeStart() + AddUnit.getExecutionDelay() >= Processor.CC )
+				x.setBusy(false);
+		}
+		
+		// MULT/DIV
+		for (int i = 0; i < Multers.multUnitNumber; i++){
+			MultUnit x = Multers.getMultUnits().get(i);
+			if (x.isBusy() && x.getExeStart() + MultUnit.getExecutionDelay() >= Processor.CC)
+				x.setBusy(false);
+		}
+		
+		// MEM
+	
+		
+		if (MemoryUnit.isBusy() && MemoryUnit.getExeStart() + 
+				MemoryUnit.getExecutionDelay() >= Processor.CC)
+			MemoryUnit.setBusy(false);
+	}
+	
 	
 
 	

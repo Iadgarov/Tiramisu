@@ -9,6 +9,11 @@ import components.Processor;
 import components.ReservationStation;
 import support.Instruction;
 
+/**
+ * Class responsible for creating collection of MULt/DIV units for the processor.
+ * @author David
+ *
+ */
 public class Multers {
 
 	private static List<MultUnit> multUnits;
@@ -24,7 +29,7 @@ public class Multers {
 	public Multers(int multUnitNumber){
 		
 		Multers.multUnitNumber = multUnitNumber;
-		multUnits = createMulUnits();
+		setMultUnits(createMulUnits());
 		MultUnit.setReservationStations(createStations());
 
 	}
@@ -55,7 +60,7 @@ public class Multers {
 	public static int freeUnitIndex(){
 		
 		for(int i =0; i< multUnitNumber; i++){
-			if (!multUnits.get(i).isBusy(Processor.CC))
+			if (!getMultUnits().get(i).isBusy())
 				return i;
 		}
 		return -1;
@@ -102,7 +107,7 @@ public class Multers {
 			}
 			
 			MultUnit.reservationStations.getInExecution()[freeInstructionIndex] = true;	// this instruction has started execution
-			multUnits.get(freeUnitIndex).execute(freeInstructionIndex);
+			getMultUnits().get(freeUnitIndex).execute(freeInstructionIndex);
 		}
 		return;
 	}
@@ -132,6 +137,14 @@ public class Multers {
 
 	public static void setReservationStationNumber(int reservationStationNumber) {
 		Multers.reservationStationNumber = reservationStationNumber;
+	}
+
+	public static List<MultUnit> getMultUnits() {
+		return multUnits;
+	}
+
+	public static void setMultUnits(List<MultUnit> multUnits) {
+		Multers.multUnits = multUnits;
 	}
 
 }

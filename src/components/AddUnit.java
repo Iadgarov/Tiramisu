@@ -10,20 +10,19 @@ import support.Tag;
  */
 public class AddUnit{
 	
-	static int executionDelay;
-	private boolean busy[];
+	private static int executionDelay;
+	private boolean busy;
 	public static ReservationStation reservationStations;
+	private int exeStart; // when execution started so we can free unit when done
+
 	
 	/**
 	 * construct a ADD/SUB unit<br>
 	 * Gives each unit a "busy" array so we know what CC's it's working 
 	 */
 	public AddUnit() {
-		
-		this.busy = new boolean[Processor.MAX_MEMORY_SIZE];
-		for (int i = 0; i < Processor.MAX_MEMORY_SIZE; i++)
-			this.busy[i] = false; // all stations start as available at first
-		
+	
+		setBusy(false);
 		
 	}
 
@@ -38,15 +37,15 @@ public class AddUnit{
 		
 		System.out.println("[CC = " + Processor.CC + "] Exe start for  " + getReservationStations().getInstructions()[stationNumber].toString() );
 
-		
+		this.exeStart = Processor.CC;
+	
 		int thread = getReservationStations().getInstructions()[stationNumber].getThread(); // thread this command belongs to
 		int command = getReservationStations().opCode[stationNumber];
 		float src0 = getReservationStations().Vj[stationNumber];
 		float src1 = getReservationStations().Vk[stationNumber];
 		//int destinationRegister = reservationStations.instructions[stationNumber].getDst();
 		
-		for (int i = 0; i < executionDelay; i++)
-			this.busy[Processor.CC + i] = true; // this unit will be working for these CC's
+		setBusy(true);
 		
 		
 		float result = 0;
@@ -62,7 +61,7 @@ public class AddUnit{
 		//write result to CDB, along with who calculated it
 		Tag tag = new Tag (ReservationStation.ADD_REPOSITORY, stationNumber, 
 				thread, getReservationStations().getInstructions()[stationNumber]);
-		CDB.writeToCDB( result, tag, Processor.CC + executionDelay);
+		CDB.writeToCDB( result, tag, Processor.CC + getExecutionDelay());
 		
 	}
 	
@@ -85,11 +84,10 @@ public class AddUnit{
 	
 	/**
 	 * is this unit busy this CC?
-	 * @param now the CC we are checking
 	 * @return true if station is working, else false
 	 */
-	public boolean isBusy(int now){
-		return this.busy[now];
+	public boolean isBusy(){
+		return this.busy;
 	}
 
 
@@ -103,6 +101,39 @@ public class AddUnit{
 	public static void setReservationStations(ReservationStation reservationStations) {
 		AddUnit.reservationStations = reservationStations;
 	}
+
+
+
+	public static int getExecutionDelay() {
+		return executionDelay;
+	}
+
+
+
+	public static void setExecutionDelay(int executionDelay) {
+		AddUnit.executionDelay = executionDelay;
+	}
+
+
+
+	public  int getExeStart() {
+		return exeStart;
+	}
+
+
+
+	public  void setExeStart(int exeStart) {
+		this.exeStart = exeStart;
+	}
+
+
+
+	public void setBusy(boolean b) {
+		this.busy = b;
+		
+	}
+	
+
 
 
 }

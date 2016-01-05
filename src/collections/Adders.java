@@ -31,7 +31,7 @@ public class Adders {
 	public Adders(int unitNumber){
 		
 		addUnitNumber = unitNumber;
-		addUnits = createAddUnits();
+		setAddUnits(createAddUnits());
 		AddUnit.setReservationStations(createStations());
 	}
 	
@@ -51,7 +51,7 @@ public class Adders {
 	public static int freeUnitIndex(){
 		
 		for(int i =0; i< addUnitNumber; i++){
-			if (!addUnits.get(i).isBusy(Processor.CC))
+			if (!getAddUnits().get(i).isBusy())
 				return i;
 		}
 		return -1;
@@ -129,7 +129,7 @@ public class Adders {
 				InstructionQueue.getExeCC_1()[inst.getqLocation()] = Processor.CC;
 			}
 			AddUnit.reservationStations.getInExecution()[freeInstructionIndex] = true;	// this instruction has started execution
-			addUnits.get(freeUnitIndex).execute(freeInstructionIndex);
+			getAddUnits().get(freeUnitIndex).execute(freeInstructionIndex);
 		}
 		
 		
@@ -142,6 +142,14 @@ public class Adders {
 
 	public static void setReservationStationNumber(int reservationStationNumber) {
 		Adders.reservationStationNumber = reservationStationNumber;
+	}
+
+	public static List<AddUnit> getAddUnits() {
+		return addUnits;
+	}
+
+	public static void setAddUnits(List<AddUnit> addUnits) {
+		Adders.addUnits = addUnits;
 	}
 	
 }

@@ -4,6 +4,7 @@ import support.Tag;
 
 /**
  * The register set class
+ * We shall create one of these for each thread
  * @author David
  *
  */

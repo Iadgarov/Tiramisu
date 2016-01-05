@@ -83,33 +83,23 @@ public class CDB {
 					MultUnit.getReservationStations().Vk[stationNumber] = (Float)null;
 					MultUnit.getReservationStations().getInExecution()[stationNumber] = false;	// no longer executing this stations command
 				}
-				else if (tag.getStation() == ReservationStation.LOAD_REPOSITORY){
+				else if (tag.getStation() == ReservationStation.LOAD_REPOSITORY ||
+						tag.getStation() == ReservationStation.STORE_REPOSITORY){
 					if (memCommit)
 						continue; // already did an ADD/SUB commit in this CC
 					else 
 						memCommit = true;
 					inst = tag.getInstruction();
+					int type = inst.getOpCode();
 					
 					// remove instruction from the station, it has been taken care of
-					LoadUnit.getReservationStations().getInstructions()[stationNumber] = null;
-					LoadUnit.getReservationStations().opCode[stationNumber] = Instruction.EMPTY;
-					LoadUnit.getReservationStations().Vj[stationNumber] = (Float)null;
-					LoadUnit.getReservationStations().Vk[stationNumber] = (Float)null;
-					LoadUnit.getReservationStations().getInExecution()[stationNumber] = false;	// no longer executing this stations command
-				}
-				else if (tag.getStation() == ReservationStation.STORE_REPOSITORY){
-					if (memCommit)
-						continue; // already did an ADD/SUB commit in this CC
-					else 
-						memCommit = true;
-					inst = tag.getInstruction();
+					MemoryUnit.getReservationStations(type).getInstructions()[stationNumber] = null;
+					MemoryUnit.getReservationStations(type).opCode[stationNumber] = Instruction.EMPTY;
+					MemoryUnit.getReservationStations(type).Vj[stationNumber] = (Float)null;
+					MemoryUnit.getReservationStations(type).Vk[stationNumber] = (Float)null;
+					MemoryUnit.getReservationStations(type).getInExecution()[stationNumber] = false;	// no longer executing this stations command
 					
-					// remove instruction from the station, it has been taken care of
-					StoreUnit.getReservationStations().getInstructions()[stationNumber] = null;
-					StoreUnit.getReservationStations().opCode[stationNumber] = Instruction.EMPTY;
-					StoreUnit.getReservationStations().Vj[stationNumber] = (Float)null;
-					StoreUnit.getReservationStations().Vk[stationNumber] = (Float)null;
-					StoreUnit.getReservationStations().getInExecution()[stationNumber] = false;	// no longer executing this stations command
+					
 				}
 				else{
 					System.out.println("Unknown station writing ot CDB! EXITING!");
@@ -224,11 +214,11 @@ public class CDB {
 			// MULT/DIV stations:
 			rs = MultUnit.getReservationStations();
 		else if (station == ReservationStation.LOAD_REPOSITORY)
-			// MULT/DIV stations:
-			rs = LoadUnit.getReservationStations();
+			// MEM (LOAD) stations:
+			rs = MemoryUnit.getReservationStations(Instruction.LD);
 		else if (station == ReservationStation.STORE_REPOSITORY)
-			// MULT/DIV stations:
-			rs = StoreUnit.getReservationStations();
+			// MEM (STOREstations:
+			rs = MemoryUnit.getReservationStations(Instruction.ST);
 		else{
 			System.out.println("Unknown reservation station accessing CDB");
 			System.exit(0);
