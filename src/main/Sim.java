@@ -95,7 +95,8 @@ public class Sim {
 				inst.setqLocation(i/2);
 				inst.setThread(i%2);
 				InstructionQueue.getIsntHexEncoding_0()[i/2] = memoryInString.get(i);
-				InstructionQueue.setInstCount_0(InstructionQueue.getInstCount_0() + 1);
+				if (inst.getOpCode() != Instruction.NOP)
+					InstructionQueue.setInstCount_0(InstructionQueue.getInstCount_0() + 1);
 				
 				if (inst.getOpCode() == Instruction.HALT)
 					Q0Halt = true;	
@@ -105,7 +106,8 @@ public class Sim {
 				inst.setqLocation(i/2);
 				inst.setThread(i%2);
 				InstructionQueue.getIsntHexEncoding_1()[i/2] = memoryInString.get(i);
-				InstructionQueue.setInstCount_1(InstructionQueue.getInstCount_1() + 1);
+				if (inst.getOpCode() != Instruction.NOP)
+					InstructionQueue.setInstCount_1(InstructionQueue.getInstCount_1() + 1);
 				
 				if (inst.getOpCode() == Instruction.HALT)
 					Q1Halt = true;
