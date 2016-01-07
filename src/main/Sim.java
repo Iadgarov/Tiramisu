@@ -402,7 +402,7 @@ public class Sim {
 					writer.print(Integer.toString(InstructionQueue.getIssueCC_0()[i]) + "\t");
 					writer.print(Integer.toString(InstructionQueue.getExeCC_0()[i]) + "\t");
 					writer.println(((InstructionQueue.getWriteBackCC_0()[i] < 0) ?
-							-1 : Integer.toString(InstructionQueue.getWriteBackCC_0()[i])) + "\t"+ Integer.toString(InstructionQueue.getWriteBackCC_0()[i]) );
+							-1 : Integer.toString(InstructionQueue.getWriteBackCC_0()[i])) );
 				}
 			
 			}
@@ -412,7 +412,7 @@ public class Sim {
 					writer.print(Integer.toString(InstructionQueue.getIssueCC_1()[i]) + "\t");
 					writer.print(Integer.toString(InstructionQueue.getExeCC_1()[i]) + "\t");
 					writer.println(((InstructionQueue.getWriteBackCC_1()[i] < 0) ?
-							-1 : Integer.toString(InstructionQueue.getWriteBackCC_1()[i])) + "\t"+Integer.toString(InstructionQueue.getWriteBackCC_1()[i]));
+							-1 : Integer.toString(InstructionQueue.getWriteBackCC_1()[i])) );
 				}
 			}
 			else{
