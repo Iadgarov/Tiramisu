@@ -36,7 +36,7 @@ public class InstructionQueue {
 	private static int instCount_1 = 0;
 	
 	// how many instructions we've issued from each queue this CC
-	static int issueCountPerCC_0 = 0;
+	private static int issueCountPerCC_0 = 0;
 	static int issueCountPerCC_1 = 0;
 	
 	/**
@@ -67,38 +67,33 @@ public class InstructionQueue {
 	 * Issues commands in order. That is if there is a command in thread 1's queue that showed up first in<br>
 	 * the memory compared to the one in thread 0's queue it will be issued first.<br>
 	 * Remember PC for each successful issue.
+	 * @param thread the thread for which we are issuing a command for. Needed so we know which queue to look in.
 	 */
-	public void attemptIssue() {
+	public void attemptIssue(int thread) {
 		
 		// attempt issue
 		Instruction inst = new Instruction(null);
-		if (!instructionQ_0.isEmpty() && !instructionQ_1.isEmpty()){
-			
-			Instruction inst0 = instructionQ_0.peek();
-			Instruction inst1 = instructionQ_1.peek();
-			
-			// choose the one that was there first (in the instruction queue)
-			inst = ((inst0.getqLocation() * 2) <= (inst1.getqLocation() * 2 + 1)) ? inst0 : inst1;
-			
-			// unless he is a NOP.. Or we reached our issue limit for this queue
-			if (inst0.getOpCode() == Instruction.NOP || issueCountPerCC_0 >= 2)
-				inst = inst1;
-			if (inst1.getOpCode() == Instruction.NOP || issueCountPerCC_1 >= 2)
-				inst = inst0;
-			
+		
+		if (getIssueCountPerCC_0() >= 2 && issueCountPerCC_1 >= 2)
+			return;
+		
+
+		if (thread == Processor.THREAD_0){
+			if (!instructionQ_0.isEmpty() && issueCountPerCC_0 < 2)
+				inst = instructionQ_0.peek();
+			else 
+				return;
 			
 		}
-		else if (!instructionQ_0.isEmpty()){
-			inst = instructionQ_0.peek();
-	
-		}
-			
-		else if (!instructionQ_1.isEmpty()){
-			inst = instructionQ_1.peek();	
+		else if (thread == Processor.THREAD_1){
+			if (!instructionQ_1.isEmpty() && issueCountPerCC_1 < 2)
+				inst = instructionQ_1.peek();	
+			else 
+				return;
 		}
 			
 		
-		int thread = inst.getThread();
+		
 		boolean result = false;
 		
 		//System.out.println(inst.toString() + " " + thread);
@@ -143,7 +138,7 @@ public class InstructionQueue {
 			
 			setTotalIssues(getTotalIssues() + 1);
 			if (thread == Processor.THREAD_0){
-				issueCountPerCC_0++;
+				setIssueCountPerCC_0(getIssueCountPerCC_0() + 1);
 				inst = instructionQ_0.poll();
 				getIssueCC_0()[inst.getqLocation()] = Processor.CC;
 			}
@@ -261,5 +256,17 @@ public class InstructionQueue {
 
 	public static void setHalt1(boolean halt1) {
 		InstructionQueue.halt1 = halt1;
+	}
+
+	public static int getIssueCountPerCC_0() {
+		return issueCountPerCC_0;
+	}
+
+	public static void setIssueCountPerCC_0(int i) {
+		InstructionQueue.issueCountPerCC_0 = i;
+	}
+
+	public static void setIssueCountPerCC_1(int i) {
+		InstructionQueue.issueCountPerCC_1 = i;		
 	}
 }

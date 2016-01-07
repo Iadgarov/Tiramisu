@@ -190,7 +190,7 @@ public class ReservationStation {
 				temp.add(i);
 			
 			// a Store command only needs src1
-			if (this.Vj[i] != (Float)null && this.Qj[i] == null && 
+			if (this.Vk[i] != (Float)null && this.Qk[i] == null && 
 					this.opCode[i] == Instruction.ST && !this.getInExecution()[i])
 				temp.add(i);
 		}

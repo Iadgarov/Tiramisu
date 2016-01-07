@@ -51,7 +51,7 @@ public class Sim {
 	private  static int storeBuffAmount;
 	
 	private static ArrayList<Float> memory = new ArrayList<>();
-	static ArrayList<String> memoryInString = new ArrayList<>();
+	static ArrayList<String> memoryInString = new ArrayList<>();	// used to save an instructions encoding for later
 
 	/**
 	 * main, start everything here.
@@ -60,14 +60,17 @@ public class Sim {
 	 */
 	public static void main(String[] args) {
 	
-		// The memory, we will populate this from the mem file
-		
+		//System.out.println(Integer.toHexString(Float.floatToIntBits((float) 2.72)).toUpperCase());
 		
 		// get parameters from cfg
 		receive(true, args[1]);
 		// set up initial memory picture
 		receive(false, args[2]);
 		Processor.InstAmount = getMemory().size();
+		
+		// now pad the rest of the memory with zeros
+		for (int i = getMemory().size(); i < Processor.MAX_MEMORY_SIZE; i++)
+			memory.add((float) 0);
 		
 		Queue<Instruction> instQ_0 = new LinkedBlockingQueue<Instruction>();
 		Queue<Instruction> instQ_1 = new LinkedBlockingQueue<Instruction>();
@@ -79,9 +82,12 @@ public class Sim {
 		
 
 		
-		for (int i = 0 ; !(Q0Halt && Q1Halt); i++){
+		for (int i = 0 ; !(Q0Halt && Q1Halt); i++, Processor.InstAmount = i){
 			
 			Instruction inst = new Instruction(memoryInString.get(i));
+			
+			
+			System.out.println(inst.toString());
 			
 			
 			if (i % 2 == 0 && !Q0Halt){
@@ -109,6 +115,10 @@ public class Sim {
 			
 		}
 
+		Processor.InstAmount--;
+		
+		//for (int i=0;i<30;i++)
+		//	System.out.println(i+"   "+memory.get(i));
 		
 		// create the processor
 		new Processor(instQ_0, instQ_1, addUnitAmount ,
@@ -160,9 +170,15 @@ public class Sim {
 				 (InstructionQueue.isHalt0()) &&							// reached first halt
 				 (InstructionQueue.isHalt1()))){							// reached second halt
 			
+			// issue any new commands if possible
+			for (int i = 0; i < 2; i++ ){
+				Processor.instructionQ.attemptIssue((Processor.CC %2 == 0) ? Processor.THREAD_0 : Processor.THREAD_1);	
+				Processor.instructionQ.attemptIssue((Processor.CC %2 == 0) ? Processor.THREAD_1 : Processor.THREAD_0);
+			}
 			
-			for (int i = 0; i < 4; i++ )
-				Processor.instructionQ.attemptIssue();	// issue any new commands if possible
+			// ready for next CC issuing
+			InstructionQueue.setIssueCountPerCC_0(0);
+			InstructionQueue.setIssueCountPerCC_1(0);
 			
 			// Pass any commands that we can to the units
 			Adders.attemptPushToUnit(); 
@@ -193,14 +209,14 @@ public class Sim {
 		// ADD/SUB
 		for (int i = 0; i < Adders.addUnitNumber; i++){
 			AddUnit x = Adders.getAddUnits().get(i);
-			if (x.isBusy() && x.getExeStart() + AddUnit.getExecutionDelay() >= Processor.CC )
+			if (x.isBusy() && x.getExeStart() + AddUnit.getExecutionDelay() <= Processor.CC )
 				x.setBusy(false);
 		}
 		
 		// MULT/DIV
 		for (int i = 0; i < Multers.multUnitNumber; i++){
 			MultUnit x = Multers.getMultUnits().get(i);
-			if (x.isBusy() && x.getExeStart() + MultUnit.getExecutionDelay() >= Processor.CC)
+			if (x.isBusy() && x.getExeStart() + MultUnit.getExecutionDelay() <= Processor.CC)
 				x.setBusy(false);
 		}
 		
@@ -208,8 +224,9 @@ public class Sim {
 	
 		
 		if (MemoryUnit.isBusy() && MemoryUnit.getExeStart() + 
-				MemoryUnit.getExecutionDelay() >= Processor.CC)
+				MemoryUnit.getExecutionDelay() <= Processor.CC){
 			MemoryUnit.setBusy(false);
+		}
 	}
 	
 	
@@ -312,9 +329,6 @@ public class Sim {
 				while (temp.length() < 8)
 					temp = "0" + temp;
 				
-				//if (temp.equals("0"))
-				//	temp = "00000000";
-				
 				writer.println(temp);
 			}
 			writer.close();
@@ -387,7 +401,8 @@ public class Sim {
 					writer.print(InstructionQueue.getIsntHexEncoding_0()[i] + "\t");
 					writer.print(Integer.toString(InstructionQueue.getIssueCC_0()[i]) + "\t");
 					writer.print(Integer.toString(InstructionQueue.getExeCC_0()[i]) + "\t");
-					writer.println(Integer.toString(InstructionQueue.getWriteBackCC_0()[i]));
+					writer.println((InstructionQueue.getWriteBackCC_0()[i] < 0) ?
+							-1 : Integer.toString(InstructionQueue.getWriteBackCC_0()[i]));
 				}
 			
 			}
@@ -396,7 +411,8 @@ public class Sim {
 					writer.print(InstructionQueue.getIsntHexEncoding_1()[i] + "\t");
 					writer.print(Integer.toString(InstructionQueue.getIssueCC_1()[i]) + "\t");
 					writer.print(Integer.toString(InstructionQueue.getExeCC_1()[i]) + "\t");
-					writer.println(Integer.toString(InstructionQueue.getWriteBackCC_1()[i]));
+					writer.println((InstructionQueue.getWriteBackCC_1()[i] < 0) ?
+							-1 : Integer.toString(InstructionQueue.getWriteBackCC_1()[i]));
 				}
 			}
 			else{
@@ -430,6 +446,9 @@ public class Sim {
 			if (thread == Processor.THREAD_0){
 				totalInstructionCount = InstructionQueue.getInstCount_0();
 				for (int i : InstructionQueue.getWriteBackCC_0()){
+					
+					if (i < 0)
+						i *= -1;
 					totalCycleCount = Math.max(totalCycleCount, i);
 				}
 				System.out.print("CPI for thread 0: ");
@@ -437,6 +456,9 @@ public class Sim {
 			else if (thread == Processor.THREAD_1){
 				totalInstructionCount = InstructionQueue.getInstCount_1();
 				for (int i : InstructionQueue.getWriteBackCC_1()){
+					
+					if (i < 0)
+						i *= -1;
 					totalCycleCount = Math.max(totalCycleCount, i);
 				}
 				System.out.print("CPI for thread 1: ");

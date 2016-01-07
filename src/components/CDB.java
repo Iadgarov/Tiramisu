@@ -30,7 +30,9 @@ public class CDB {
 	 * Once a result has been broadcasted this means we can remove the relevant command from the relevant station and make
 	 * room for a new one. <br>
 	 * Tells all reservation stations what value is being broadcasted and by whom should they want it<br>
-	 * Commits the first instruction that matches this CC for each unit type
+	 * Commits the first instruction that matches this CC for each unit type<br>
+	 * Saves the CDB broadcast CC to be used in the trace file later. Store commands get the storing CC *(-1) so we can calculate
+	 * CPI on a program that ends with a STORE. When printing to trace a negative number is translated to -1. 
 	 * 
 	 */
 	public static void commit(){
@@ -117,9 +119,9 @@ public class CDB {
 				if (tag.getStation() != ReservationStation.STORE_REPOSITORY){
 					
 					// First the reservation stations:
-					updateStation(result, tag, ReservationStation.ADD_REPOSITORY);	// ADD/SUB stations
-					updateStation(result, tag, ReservationStation.MUL_REPOSITORY);	// MULT/DIV stations
-					updateStation(result, tag, ReservationStation.LOAD_REPOSITORY);	// MULT/DIV stations
+					updateStation(result, tag, ReservationStation.ADD_REPOSITORY);		// ADD/SUB stations
+					updateStation(result, tag, ReservationStation.MUL_REPOSITORY);		// MULT/DIV stations
+					updateStation(result, tag, ReservationStation.LOAD_REPOSITORY);		// MULT/DIV stations
 					updateStation(result, tag, ReservationStation.STORE_REPOSITORY);	// MULT/DIV stations
 				
 					
@@ -139,10 +141,13 @@ public class CDB {
 					updateMemory(result, tag, address, i);	// STORE updating the memory
 					
 					// remember when this instruction was committed
+					// for a STORE command save the CC*(-1) so we know to print -1 in the trace file instead
 					if (tag.getThread() == Processor.THREAD_0)
-						InstructionQueue.getWriteBackCC_0()[inst.getqLocation()] = -1;
+						InstructionQueue.getWriteBackCC_0()[inst.getqLocation()] = -1 * Processor.CC;
 					else if (tag.getThread() == Processor.THREAD_1)
-						InstructionQueue.getWriteBackCC_1()[inst.getqLocation()] = -1;
+						InstructionQueue.getWriteBackCC_1()[inst.getqLocation()] = -1 * Processor.CC;
+					
+					
 				}
 				else{
 					System.out.println("Unkown command type attempting to write on CDB. EXITING!");
@@ -155,6 +160,7 @@ public class CDB {
 				commitWhen.remove(i);
 				commitWho.remove(i);
 				commitWhat.remove(i);
+				commitWhere.remove(i);
 			
 			}
 		
@@ -176,6 +182,7 @@ public class CDB {
 		//System.out.println("Waiting for commit: result = " + result + " When = " + when);
 		//System.out.println("Who: station = " + tag.getStation() + " line = " + tag.getStationLine() + " thread = " + tag.getThread());
 		
+		commitWhere.add(-1);	// add dummy value to fix stupid bug
 		commitWhen.add(when);
 		commitWhat.add(result);
 		commitWho.add(tag);
@@ -194,7 +201,9 @@ public class CDB {
 	public static void writeToCDB(float result, Tag tag, int when, int address){
 		
 		commitWhere.add(address);
-		writeToCDB(result, tag, when);
+		commitWhen.add(when);
+		commitWhat.add(result);
+		commitWho.add(tag);
 	}
 	
 	
@@ -285,11 +294,7 @@ public class CDB {
 		
 		Processor.memory.set(address, result);
 		
-		// remember when this instruction was committed
-		if (tag.getThread() == Processor.THREAD_0)
-			InstructionQueue.getWriteBackCC_0()[i] = Processor.CC;
-		else if (tag.getThread() == Processor.THREAD_1)
-			InstructionQueue.getWriteBackCC_1()[i] = Processor.CC;
+
 		
 	}
 

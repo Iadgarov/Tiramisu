@@ -38,12 +38,27 @@ public class Instruction {
 		
 		if (commandLine == null)
 			return;
+		/*
+		System.out.println(commandLine.substring(0, 1));
+		System.out.println(commandLine.substring(1, 2));
+		System.out.println(commandLine.substring(2, 3));
+		System.out.println(commandLine.substring(3, 4));
+		System.out.println(commandLine.substring(4, 8));
+		
+		System.out.println(Integer.parseInt(commandLine.substring(0, 1), 16));
+		System.out.println(Integer.parseInt(commandLine.substring(1,2), 16));
+		System.out.println(Integer.parseInt(commandLine.substring(2,3), 16));
+		System.out.println(Integer.parseInt(commandLine.substring(3,4), 16));
+		System.out.println(Integer.parseInt(commandLine.substring(4,8), 16));
+		*/
 		
 		this.opCode		= Integer.parseInt(commandLine.substring(0, 1), 16);
 		this.dst 		= Integer.parseInt(commandLine.substring(1, 2), 16);
 		this.src0 		= Integer.parseInt(commandLine.substring(2, 3), 16);
 		this.src1 		= Integer.parseInt(commandLine.substring(3, 4), 16);
 		this.immidiate 	= Integer.parseInt(commandLine.substring(4, 8), 16);
+		
+		
 
 	}
 	
@@ -129,8 +144,8 @@ public class Instruction {
 		
 			case EMPTY: returnMe += "NO-COMMAND "; break;
 			case NOP: 	returnMe += "NOP "; break;
-			case LD:	returnMe += "LOAD F" + this.dst + " " + this.immidiate + "(" + this.src0 + ")"; break;
-			case ST:	returnMe += "STORE F" + this.src0 + " " + this.immidiate + "(" + this.dst + ")"; break;
+			case LD:	returnMe += "LOAD F" + this.dst + " " + this.immidiate + "(0)"; break;
+			case ST:	returnMe += "STORE F" + this.src1 + " " + this.immidiate + "(" + this.dst + ")"; break;
 			case ADD:	returnMe += "ADD F" + this.dst + " F" + this.src0 + " F" + this.src1; break;
 			case SUB:	returnMe +=	"SUB F" + this.dst + " F" + this.src0 + " F" + this.src1; break;
 			case MULT:	returnMe += "MULT F" + this.dst + " F" + this.src0 + " F" + this.src1; break;

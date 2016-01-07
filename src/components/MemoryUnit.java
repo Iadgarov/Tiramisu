@@ -47,17 +47,22 @@ public class MemoryUnit {
 
 	/**
 	 * Doing the actual calculation (what happens once a command enters a unit from the station)
-	 * and writing to CDB
+	 * and writing to CDB<br>
+	 * For a STORE command the saving to memory happens in the CDB class to simulate the unit delay and save the
+	 * commands completion CC.
 	 * @param type LOAD or STORE?
 	 * @param stationNumber the line in the reservation station table that holds the to be executed instruction
 	 */
 	public static void execute(int stationNumber, int type) {
 		
+		System.out.println("[CC = " + Processor.CC + "] Exe start for  " + getReservationStations(type).getInstructions()[stationNumber].toString() );
+
+		
 		exeStart = Processor.CC;
 		
 		int thread = getReservationStations(type).getInstructions()[stationNumber].getThread(); // thread this command belongs to
 		int command = getReservationStations(type).opCode[stationNumber];
-		int dst = getReservationStations(type).getInstructions()[stationNumber].getDst();
+		//int dst = getReservationStations(type).getInstructions()[stationNumber].getDst();
 		
 		
 		busy = true; // this unit will be working for these CC's
@@ -84,15 +89,21 @@ public class MemoryUnit {
 		
 		else if (command == Instruction.ST){
 		
+			/*
 			if (thread == Processor.THREAD_0)
 				result = Processor.registers_0.getRegisters()[dst];
 			else if (thread == Processor.THREAD_1)
 				result = Processor.registers_1.getRegisters()[dst];
+			*/
+			
+			result = getReservationStations(type).Vk[stationNumber];
 			
 			//write result to CDB, along with who calculated it and address since this is a LOAD command
 			Tag tag =  new Tag (ReservationStation.STORE_REPOSITORY, 
 					stationNumber, thread, getReservationStations(type).getInstructions()[stationNumber]);
-			CDB.writeToCDB( result, tag, Processor.CC + executionDelay, getReservationStations(type).immediate[stationNumber]);
+		
+			int address = getReservationStations(type).immediate[stationNumber];
+			CDB.writeToCDB( result, tag, Processor.CC + executionDelay, address);
 
 		}
 		else {
@@ -138,7 +149,7 @@ public class MemoryUnit {
 		
 		//ReservationStation t = reservationStations;
 		
-		int freeInstructionIndex;;	// index of reservation station that we want
+		int freeInstructionIndex;	// index of reservation station that we want
 		
 		while ((freeInstructionIndex = getReservationStations(type).isReadyIndex()) != -1){
 				
@@ -195,6 +206,7 @@ public class MemoryUnit {
 	}
 
 	public static int getExecutionDelay() {
+		
 		return executionDelay;
 	}
 }
