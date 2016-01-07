@@ -35,7 +35,8 @@ public class AddUnit{
 	 */
 	public void execute(int stationNumber) {
 		
-		System.out.println("[CC = " + Processor.CC + "] Exe start for  " + getReservationStations().getInstructions()[stationNumber].toString() );
+		System.out.println("Thread = "+ getReservationStations().thread[stationNumber] +
+				" [CC = " + Processor.CC + "] Exe start for  " + getReservationStations().getInstructions()[stationNumber].toString() );
 
 		this.exeStart = Processor.CC;
 	

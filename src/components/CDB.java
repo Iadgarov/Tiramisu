@@ -30,17 +30,18 @@ public class CDB {
 	 * Once a result has been broadcasted this means we can remove the relevant command from the relevant station and make
 	 * room for a new one. <br>
 	 * Tells all reservation stations what value is being broadcasted and by whom should they want it<br>
-	 * Commits the first instruction that matches this CC for each unit type<br>
+	 * Commits all instructions that are ready for it per CC.
 	 * Saves the CDB broadcast CC to be used in the trace file later. Store commands get the storing CC *(-1) so we can calculate
 	 * CPI on a program that ends with a STORE. When printing to trace a negative number is translated to -1. 
 	 * 
 	 */
 	public static void commit(){
 		
-		// flags: false if we have yet to put this type of command result onto the line
+		/* flags: false if we have yet to put this type of command result onto the line
 		boolean addCommit = false;
 		boolean multCommit = false;
 		boolean memCommit = false;
+		*/
 		
 		// if it's your time (execute would have finished by now) get committed
 		for (int i = 0; i < commitWhen.size(); i++){
@@ -58,10 +59,7 @@ public class CDB {
 				Instruction inst = null;
 						
 				if (tag.getStation() == ReservationStation.ADD_REPOSITORY){
-					if (addCommit)
-						continue; // already did an ADD/SUB commit in this CC
-					else 
-						addCommit = true;
+				
 					inst = tag.getInstruction();
 					
 					// remove instruction from the station, it has been taken care of
@@ -72,10 +70,7 @@ public class CDB {
 					AddUnit.getReservationStations().getInExecution()[stationNumber] = false;	// no longer executing this stations command
 				}
 				else if (tag.getStation() == ReservationStation.MUL_REPOSITORY){
-					if (multCommit)
-						continue; // already did an MULT/DIV commit in this CC
-					else 
-						multCommit = true;
+			
 					inst = tag.getInstruction();
 					
 					// remove instruction from the station, it has been taken care of
@@ -87,10 +82,7 @@ public class CDB {
 				}
 				else if (tag.getStation() == ReservationStation.LOAD_REPOSITORY ||
 						tag.getStation() == ReservationStation.STORE_REPOSITORY){
-					if (memCommit)
-						continue; // already did an ADD/SUB commit in this CC
-					else 
-						memCommit = true;
+				
 					inst = tag.getInstruction();
 					int type = inst.getOpCode();
 					
@@ -110,7 +102,7 @@ public class CDB {
 				
 				
 				setTotalCommits(getTotalCommits() + 1);
-				System.out.println("[CC = " + Processor.CC + "] Commit for  " + inst.toString() );
+				System.out.println("Thread = "+ tag.getThread() +" [CC = " + Processor.CC + "] Commit for  " + inst.toString() );
 				//System.out.println("Adders all busy? " + Processor.addUnits.isFullyBusy());
 				//System.out.println("Multers all busy? " + Processor.multUnits.isFullyBusy());
 				

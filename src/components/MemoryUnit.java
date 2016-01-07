@@ -55,7 +55,8 @@ public class MemoryUnit {
 	 */
 	public static void execute(int stationNumber, int type) {
 		
-		System.out.println("[CC = " + Processor.CC + "] Exe start for  " + getReservationStations(type).getInstructions()[stationNumber].toString() );
+		System.out.println("Thread = "+ getReservationStations(type).thread[stationNumber] +
+               " [CC = " + Processor.CC + "] Exe start for  " + getReservationStations(type).getInstructions()[stationNumber].toString() );
 
 		
 		exeStart = Processor.CC;
