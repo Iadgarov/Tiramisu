@@ -1,7 +1,6 @@
 package components;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 import collections.RegisterCollection;
 import components.Processor;
