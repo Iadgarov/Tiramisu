@@ -1,6 +1,7 @@
 package components;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import collections.RegisterCollection;
 import components.Processor;
@@ -186,7 +187,7 @@ public class ReservationStation {
 				temp.add(i);
 			
 			// a Load command is always ready in our case
-			if (this.opCode[i] == Instruction.LD && !this.getInExecution()[i])
+			if (this.opCode[i] == Instruction.LD && !this.getInExecution()[i] )
 				temp.add(i);
 			
 			// a Store command only needs src1

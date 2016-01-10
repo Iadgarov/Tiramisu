@@ -74,6 +74,7 @@ public class InstructionQueue {
 		// attempt issue
 		Instruction inst = new Instruction(null);
 		
+		// up to 2 commands from thread per CC, should never get here to be honest, dead code
 		if (getIssueCountPerCC_0() >= 2 && issueCountPerCC_1 >= 2)
 			return;
 		
@@ -93,7 +94,7 @@ public class InstructionQueue {
 		}
 			
 		
-		
+		// result marks success or failure in pushing to station
 		boolean result = false;
 		
 		//System.out.println(inst.toString() + " " + thread);

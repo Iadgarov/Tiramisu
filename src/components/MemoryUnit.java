@@ -148,24 +148,35 @@ public class MemoryUnit {
 		
 		// find instruction that is ready to be pushed
 		
-		//ReservationStation t = reservationStations;
+		ReservationStation rs =  getReservationStations(type);
 		
 		int freeInstructionIndex;	// index of reservation station that we want
 		
-		while ((freeInstructionIndex = getReservationStations(type).isReadyIndex()) != -1){
+		while ((freeInstructionIndex = rs.isReadyIndex()) != -1){
 				
+			Instruction inst = getReservationStations(type).getInstructions()[freeInstructionIndex];
 			
 			if (freeInstructionIndex == -1)
 				return; // nothing to push, no commands are ready
 			
-	
+			// test to see if this memory command is dependent on previous ones.
+			if (type == Instruction.LD){
+				if (isAddressInUse(Instruction.ST, inst.getqLocation(), inst.getImmidiate()))
+					return;
+			}
+			else if (type == Instruction.ST){
+				if (isAddressInUse(Instruction.ST, inst.getqLocation(), inst.getImmidiate()) &&
+						isAddressInUse(Instruction.LD, inst.getqLocation(), inst.getImmidiate()))
+					return;
+			}
+				
 		
 			if (isBusy())
 				return; // no free units available for execution work
 			
 			// We have an instruction and a unit willing to run it
 			// Mark this CC as the CC that this command started execution
-			Instruction inst = getReservationStations(type).getInstructions()[freeInstructionIndex];
+			
 			if (inst.getThread() == Processor.THREAD_0){
 				
 				if (InstructionQueue.getIssueCC_0()[inst.getqLocation()] >= Processor.CC)
@@ -184,6 +195,34 @@ public class MemoryUnit {
 			getReservationStations(inst.getOpCode()).getInExecution()[freeInstructionIndex] = true;	// this instruction has started execution
 			execute(freeInstructionIndex, inst.getOpCode());	
 		}
+	}
+	
+	
+	/**
+	 * Goes over the buffer (load or store, based on type) and checks if there is a command using the address
+	 * that has also been issued before our own command.
+	 * @param type the type of buffer we wants to check (Load or Store)
+	 * @param myInstructionQueueLocation the location of the calling command in the instruction Queue. 
+	 * Only a command that uses the same address and shows up earlier than us will cause a true return value.
+	 * @address the address in question.
+	 * @return True if there exists a command in the buffer that needs said address before the calling command does, else false;
+	 */
+	private static boolean isAddressInUse(int type, int myInstructionQueueLocation, int address){
+		
+		ReservationStation rs = getReservationStations(type);
+		// go over station spots that are full and compare addresses
+		for (int i = 0; i < rs.immediate.length; i++){
+			
+			if (rs.getInstructions()[i] == null)
+				continue;
+			
+			if (rs.immediate[i] == address)
+				if (rs.getInstructions()[i].getqLocation() < myInstructionQueueLocation)
+					return true;
+			
+					
+		}
+		return false;
 	}
 
 	public static ReservationStation getReservationStations(int type) {
