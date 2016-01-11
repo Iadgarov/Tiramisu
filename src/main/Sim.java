@@ -88,7 +88,7 @@ public class Sim {
 			inst.setGlobalQLocation(i);
 			
 			
-			System.out.println(inst.toString() + " Belongs to thread = " + i%2);
+			System.out.println(inst.toString());
 			
 			
 			if (i % 2 == 0 && !Q0Halt){
