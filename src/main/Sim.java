@@ -85,9 +85,10 @@ public class Sim {
 		for (int i = 0 ; !(Q0Halt && Q1Halt); i++, Processor.InstAmount = i){
 			
 			Instruction inst = new Instruction(memoryInString.get(i));
+			inst.setGlobalQLocation(i);
 			
 			
-			System.out.println(inst.toString());
+			System.out.println(inst.toString() + " Belongs to thread = " + i%2);
 			
 			
 			if (i % 2 == 0 && !Q0Halt){
@@ -148,7 +149,7 @@ public class Sim {
 	 */
 	public static float hexStringToFloat(String myString){
         
-        Long i = Long.parseLong(myString, 16);
+        Long i = Long.parseLong(myString.substring(0,8), 16);
         Float f = Float.intBitsToFloat(i.intValue());
         return f;
 		
@@ -185,8 +186,9 @@ public class Sim {
 			// Pass any commands that we can to the units
 			Adders.attemptPushToUnit(); 
 			Multers.attemptPushToUnit();
-			MemoryUnit.attemptPushToUnit(Instruction.LD);
 			MemoryUnit.attemptPushToUnit(Instruction.ST);
+			MemoryUnit.attemptPushToUnit(Instruction.LD);
+			
 			
 			unitClean();	// release units that are done with execution
 			

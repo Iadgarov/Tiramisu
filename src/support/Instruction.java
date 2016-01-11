@@ -26,6 +26,7 @@ public class Instruction {
 	private int src1;
 	private int immidiate;
 	private int qLocation; 	// where is it in the instruction Queue
+	private int globalQLocation; // location in total command list
 	private int thread;		// which thread does it belong to
 	//private int currentExeCC; // how many CC's have we already spent in the execution?
 	
@@ -57,7 +58,6 @@ public class Instruction {
 		this.src0 		= Integer.parseInt(commandLine.substring(2, 3), 16);
 		this.src1 		= Integer.parseInt(commandLine.substring(3, 4), 16);
 		this.immidiate 	= Integer.parseInt(commandLine.substring(4, 8), 16);
-		
 		
 
 	}
@@ -100,6 +100,15 @@ public class Instruction {
 	public int getqLocation() {
 		return this.qLocation;
 	}
+	
+	public int getGlobalQLocation() {
+		return this.globalQLocation;
+	}
+	
+	public void setGlobalQLocation( int i) {
+		this.globalQLocation = i;
+	}
+
 
 	public void setqLocation(int qLocation) {
 		this.qLocation = qLocation;

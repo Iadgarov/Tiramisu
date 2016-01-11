@@ -103,6 +103,7 @@ public class ReservationStation {
 		this.getInstructions()[insertHere] = inst;
 		this.immediate[insertHere] = inst.getImmidiate();
 		this.acceptedWhen[insertHere] = entryNumber++;
+		this.thread[insertHere] = thread;
 		
 		RegisterCollection registers;
 		// WHICH THREAD? 
@@ -136,7 +137,7 @@ public class ReservationStation {
 		if (inst.getOpCode() != Instruction.ST){
 			
 			registers.getStatus()[inst.getDst()] = new Tag(this.type, insertHere, thread, inst);
-			System.out.print("");
+			//System.out.print("");
 		}
 		
 

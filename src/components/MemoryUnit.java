@@ -72,6 +72,11 @@ public class MemoryUnit {
 			System.out.println("Something went wrong, type and opcode are not the same! EXITING!");
 			System.exit(0);
 		}
+		
+		if (getReservationStations(type).thread[stationNumber] != thread){
+			System.out.println("Something went wrong, thread in instruction and station not the same! EXITING!");
+			System.exit(0);
+		}
 			
 		
 		float result = 0;
@@ -154,19 +159,19 @@ public class MemoryUnit {
 		
 		while ((freeInstructionIndex = rs.isReadyIndex()) != -1){
 				
-			Instruction inst = getReservationStations(type).getInstructions()[freeInstructionIndex];
+			Instruction inst = rs.getInstructions()[freeInstructionIndex];
 			
 			if (freeInstructionIndex == -1)
 				return; // nothing to push, no commands are ready
 			
 			// test to see if this memory command is dependent on previous ones.
 			if (type == Instruction.LD){
-				if (isAddressInUse(Instruction.ST, inst.getqLocation(), inst.getImmidiate()))
+				if (isAddressInUse(Instruction.ST, inst.getGlobalQLocation(), inst.getImmidiate()))
 					return;
 			}
 			else if (type == Instruction.ST){
-				if (isAddressInUse(Instruction.ST, inst.getqLocation(), inst.getImmidiate()) &&
-						isAddressInUse(Instruction.LD, inst.getqLocation(), inst.getImmidiate()))
+				if (isAddressInUse(Instruction.ST, inst.getGlobalQLocation(), inst.getImmidiate()) &&
+						isAddressInUse(Instruction.LD, inst.getGlobalQLocation(), inst.getImmidiate()))
 					return;
 			}
 				
@@ -217,7 +222,7 @@ public class MemoryUnit {
 				continue;
 			
 			if (rs.immediate[i] == address)
-				if (rs.getInstructions()[i].getqLocation() < myInstructionQueueLocation)
+				if (rs.getInstructions()[i].getGlobalQLocation() < myInstructionQueueLocation)
 					return true;
 			
 					
