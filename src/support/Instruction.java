@@ -29,6 +29,7 @@ public class Instruction {
 	private int globalQLocation; // location in total command list
 	private int thread;		// which thread does it belong to
 	//private int currentExeCC; // how many CC's have we already spent in the execution?
+	private String dependentOn = "";
 	
 	/**
 	 * Takes command line string from memory array and converts it into an instruction.<br>
@@ -164,6 +165,18 @@ public class Instruction {
 		}
 		
 		return returnMe;
+	}
+
+
+
+	public String getDependentOn() {
+		return dependentOn;
+	}
+
+
+
+	public void setDependentOn(String dependentOn) {
+		this.dependentOn = dependentOn;
 	}
 	
 	

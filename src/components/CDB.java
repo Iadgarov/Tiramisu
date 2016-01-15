@@ -102,7 +102,9 @@ public class CDB {
 				
 				
 				setTotalCommits(getTotalCommits() + 1);
-				System.out.println("Thread = "+ tag.getThread() +" [CC = " + Processor.CC + "] Commit for  " + inst.toString() );
+				System.out.println("Thread = "+ tag.getThread() +" [CC = " + Processor.CC +
+						"]\tCommit for:\t" + inst.toString() );
+				
 				//System.out.println("Adders all busy? " + Processor.addUnits.isFullyBusy());
 				//System.out.println("Multers all busy? " + Processor.multUnits.isFullyBusy());
 				

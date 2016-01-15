@@ -55,8 +55,16 @@ public class MemoryUnit {
 	 */
 	public static void execute(int stationNumber, int type) {
 		
-		System.out.println("Thread = "+ getReservationStations(type).thread[stationNumber] +
-               " [CC = " + Processor.CC + "] Exe start for  " + getReservationStations(type).getInstructions()[stationNumber].toString() );
+		System.out.print("Thread = "+ getReservationStations(type).thread[stationNumber] +
+               " [CC = " + Processor.CC + "]\tExe start for:\t" 
+				+ getReservationStations(type).getInstructions()[stationNumber].toString());
+		
+		if (getReservationStations(type).getInstructions()[stationNumber].getDependentOn().toString() != "Nothing")
+			System.out.println("\t" 
+               + getReservationStations(type).getInstructions()[stationNumber].getDependentOn().toString() 
+               + " must have finished");
+		else
+			System.out.println();
 
 		
 		exeStart = Processor.CC;

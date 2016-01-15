@@ -114,6 +114,8 @@ public class ReservationStation {
 	
 		
 		// if status is null then take value from register, otherwise set Q to status 
+		
+		String dependentOn = "";
 		// For the J:
 		if  (registers.getStatus()[inst.getSrc0()] == null){
 			this.Vj[insertHere] = registers.getRegisters()[inst.getSrc0()];
@@ -121,7 +123,8 @@ public class ReservationStation {
 		}
 		else{
 			this.Vj[insertHere] = (Float) null;
-			this.Qj[insertHere] = registers.getStatus()[inst.getSrc0()];	
+			this.Qj[insertHere] = registers.getStatus()[inst.getSrc0()];
+			dependentOn += this.Qj[insertHere].getInstruction().toString();
 		}
 		// For the K:
 		if  (registers.getStatus()[inst.getSrc1()] == null){
@@ -130,8 +133,13 @@ public class ReservationStation {
 		}
 		else{
 			this.Vk[insertHere] = (Float) null;
-			this.Qk[insertHere] = registers.getStatus()[inst.getSrc1()];	
+			this.Qk[insertHere] = registers.getStatus()[inst.getSrc1()];
+			dependentOn += (dependentOn == "") ?  "" : " & ";
+			dependentOn +=	this.Qk[insertHere].getInstruction().toString();
 		}	
+		
+		dependentOn = (dependentOn == "") ? "Nothing" : dependentOn;
+		inst.setDependentOn(dependentOn);
 		
 		// Update status for register being changed by this command, except for STORE command, no register update there
 		if (inst.getOpCode() != Instruction.ST){
@@ -186,7 +194,7 @@ public class ReservationStation {
 					&& this.Qj[i] == null && this.Qk[i] == null && !this.getInExecution()[i])
 				temp.add(i);
 			
-			// a Load command is always ready in our case
+			// a Load command is always ready unless memory sync must be kept
 			if (this.opCode[i] == Instruction.LD && !this.getInExecution()[i] )
 				temp.add(i);
 			

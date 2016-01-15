@@ -81,6 +81,7 @@ public class Sim {
 		boolean Q1Halt = false;	// has queue 1 gotten halt?
 		
 
+		System.out.println("The program in Assembly:\n");
 		
 		for (int i = 0 ; !(Q0Halt && Q1Halt); i++, Processor.InstAmount = i){
 			
@@ -88,7 +89,7 @@ public class Sim {
 			inst.setGlobalQLocation(i);
 			
 			
-			System.out.println(inst.toString());
+			System.out.println("\t" + inst.toString());
 			
 			
 			if (i % 2 == 0 && !Q0Halt){
@@ -117,16 +118,19 @@ public class Sim {
 			
 			
 		}
-
-		Processor.InstAmount--;
 		
-		//for (int i=0;i<30;i++)
-		//	System.out.println(i+"   "+memory.get(i));
+		// remove the two halt commands from the command count
+		Processor.InstAmount--;
+		Processor.InstAmount--;
+
+		System.out.println();
 		
 		// create the processor
 		new Processor(instQ_0, instQ_1, addUnitAmount ,
 				addDelay, multUnitAmount, multDelay, storeBuffAmount, loadBuffAmount, 
 				addStationAmount, multStationAmount, memDelay);
+		
+		System.out.println("Here we go:\n");
 		
 		doWork();
 		
@@ -356,11 +360,11 @@ public class Sim {
 		
 		if (thread == Processor.THREAD_0){
 			rg = Processor.registers_0;
-			System.out.println("Registers for thread 0:");
+			System.out.println("\nRegisters for thread 0:");
 		}
 		else if (thread == Processor.THREAD_1){
 			rg = Processor.registers_1;
-			System.out.println("Registers for thread 1:");
+			System.out.println("\nRegisters for thread 1:");
 		}
 		else{
 			System.out.println("Attempted access to register of an undefined thread! EXITING!");
@@ -369,15 +373,17 @@ public class Sim {
 	
 		try{
 			PrintWriter writer = new PrintWriter(file, "UTF-8");
-			System.out.print("[");
+			
 			int count = 0;
-			for (float i : rg.getRegisters()){
-				writer.println(i);
+			for (int i = 0; i < rg.getRegisters().length; i++){
+				writer.println(rg.getRegisters()[i]);
 				String temp = (count == 15) ? "" : ", ";
-				System.out.print("F" + (count++) + "=" + i + temp);
+				System.out.print("F" + (count++) + " = " + rg.getRegisters()[i] + temp);
+				if (i % 5 == 0 && i > 0)
+					System.out.println();
 				
 			}
-			System.out.println("]");
+			
 			writer.close();
 		} catch (IOException x) {
 		    System.err.format("IOException: %s%n", x);
@@ -455,7 +461,7 @@ public class Sim {
 						i *= -1;
 					totalCycleCount = Math.max(totalCycleCount, i);
 				}
-				System.out.print("CPI for thread 0: ");
+				System.out.print("\nCPI for thread 0: ");
 			}
 			else if (thread == Processor.THREAD_1){
 				totalInstructionCount = InstructionQueue.getInstCount_1();
@@ -465,7 +471,7 @@ public class Sim {
 						i *= -1;
 					totalCycleCount = Math.max(totalCycleCount, i);
 				}
-				System.out.print("CPI for thread 1: ");
+				System.out.print("\nCPI for thread 1: ");
 			}
 			else{
 				System.out.println("Attempted access instructions of an undefined thread! EXITING!");

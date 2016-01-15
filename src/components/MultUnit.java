@@ -34,9 +34,16 @@ public class MultUnit{
 	 */
 	public void execute(int stationNumber) {
 		
-		System.out.println("Thread = "+ getReservationStations().thread[stationNumber] +
-				" [CC = " + Processor.CC + "] Exe start for  " + getReservationStations().getInstructions()[stationNumber].toString() );
+		System.out.print("Thread = "+ getReservationStations().thread[stationNumber] +
+				" [CC = " + Processor.CC + "]\tExe start for:\t" + getReservationStations().getInstructions()[stationNumber].toString() );
 
+		if (getReservationStations().getInstructions()[stationNumber].getDependentOn().toString() != "Nothing")
+			System.out.println("\t" 
+               + getReservationStations().getInstructions()[stationNumber].getDependentOn().toString() 
+               + " must have finished");
+		else
+			System.out.println();
+		
 		this.exeStart = Processor.CC;
 		
 		int thread = getReservationStations().getInstructions()[stationNumber].getThread(); // thread this command belongs to

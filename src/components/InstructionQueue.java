@@ -134,8 +134,9 @@ public class InstructionQueue {
 		// If successful issue then remove instruction from the queue and set the issue cycle for the instruction
 		if (result){
 			
-			System.out.println("[CC = " + Processor.CC + "] Issue for thread " 
-								+ inst.getThread() + " > " + inst.toString());
+			System.out.println("Thread = " + inst.getThread() + 
+					" [CC = " + Processor.CC + "]\tIssue for: \t" + inst.toString()
+					+ "\tDependent on: " + inst.getDependentOn());
 			
 			setTotalIssues(getTotalIssues() + 1);
 			if (thread == Processor.THREAD_0){
