@@ -14,10 +14,10 @@ public class MemoryUnit {
 	static int executionDelay;
 	static int reservationStationNumberLOAD;		// load buffer amount
 	static int reservationStationNumberSTORE;		// store buffer amounts
-	private static boolean busy;
-	private static int exeStart; // when execution started so we can free unit when done
-	private static ReservationStation reservationStationsLOAD;
-	private static ReservationStation reservationStationsSTORE;
+	private static boolean busy;	// is unit doing something right now?
+	private static int exeStart; // when execution started so we can free unit when done (free unit upon exeStart+exeDelay)
+	private static ReservationStation reservationStationsLOAD;	// reservation stations for LOAD commands = load buffers
+	private static ReservationStation reservationStationsSTORE;	// reservation stations for STORE commands = store buffers
 	
 	/**
 	 * construct a MEM unit<br>
@@ -32,7 +32,8 @@ public class MemoryUnit {
 	}
 
 	/**
-	 * construct reservation stations for all STORE units
+	 * construct reservation stations = buffers for all LOAD/STORE units.
+	 * Calls RservationStation constructor
 	 * @param type tells us if we want a load buffer or a store buffer
 	 * @return	reservation stations Object of correct size for STORE unit
 	 */
@@ -48,7 +49,7 @@ public class MemoryUnit {
 	/**
 	 * Doing the actual calculation (what happens once a command enters a unit from the station)
 	 * and writing to CDB<br>
-	 * For a STORE command the saving to memory happens in the CDB class to simulate the unit delay and save the
+	 * Loading/saving to memory happens in the CDB class to simulate the unit delay and save the
 	 * commands completion CC.
 	 * @param type LOAD or STORE?
 	 * @param stationNumber the line in the reservation station table that holds the to be executed instruction
@@ -103,12 +104,7 @@ public class MemoryUnit {
 		
 		else if (command == Instruction.ST){
 		
-			/*
-			if (thread == Processor.THREAD_0)
-				result = Processor.registers_0.getRegisters()[dst];
-			else if (thread == Processor.THREAD_1)
-				result = Processor.registers_1.getRegisters()[dst];
-			*/
+		
 			
 			result = getReservationStations(type).Vk[stationNumber];
 			
@@ -121,7 +117,7 @@ public class MemoryUnit {
 
 		}
 		else {
-				System.out.println("NONE MEMORY COMMAND SENT TO STORE UNIT!! : " 
+				System.out.println("NONE MEMORY COMMAND SENT TO MEM UNIT!! : " 
 						+ getReservationStations(type).getInstructions()[stationNumber] + "EXITING");
 				System.exit(0);
 			}
@@ -130,6 +126,7 @@ public class MemoryUnit {
 	
 	/**
 	 * attempt to accept new command into the reservation station. If there is room we will succeed. 
+	 * Calls addInstruction command in ReservationStation class. 
 	 * @param inst the instruction we want to our station
 	 * @param thread the thread the instruction belongs to
 	 * @return True if successful, else false
@@ -250,6 +247,10 @@ public class MemoryUnit {
 		
 	}
 
+	/**
+	 * Get CC of when the unit began current job
+	 * @return CC of when the unit began current job
+	 */
 	public static int getExeStart() {
 		return exeStart;
 	}

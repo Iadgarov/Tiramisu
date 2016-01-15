@@ -4,19 +4,21 @@ package support;
 /**
  * Tag class, append this to data that is written to CDB so we know where it came from.<br>
  * 
- * (1,j,i) = ADD/SUB reservation station line j thread i	<br>
- * 
- * (-1,j,i) = MUL/DIV reservation station line j thread i	
+ * (k,j,i) =  reservation k station line j thread i	<br>
+ * k = 0 = ADD/SUB
+ * k = 1 = MULT/DIV
+ * k = 2 = LOAD
+ * k = 3 = STORE
  * 
  * @author David
  *
  */
 public class Tag {
 	
-	private int station;
-	private int stationLine;
-	private int thread;
-	private Instruction inst;
+	private int station;		// what station or buffer are we talking about?
+	private int stationLine;	// what part of the buffer/station?
+	private int thread;			// which thread?
+	private Instruction inst;	// what's the instruction?
 	
 	public Tag(int station, int stationLine, int thread, Instruction inst){
 		this.station = station;

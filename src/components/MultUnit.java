@@ -4,7 +4,7 @@ import support.Instruction;
 import support.Tag;
 
 /**
- * the MUL/DIV class. A processing unit for floating point multiplication and division. 
+ * the MUL/DIV class. An individual processing unit for floating point multiplication and division. 
  * @author David
  *
  */
@@ -12,8 +12,8 @@ public class MultUnit{
 	
 	static int executionDelay;
 	private boolean busy;		// true if station is busy in a specific CC
-	public static ReservationStation reservationStations;
-	private int exeStart; // when execution started so we can free unit when done
+	public static ReservationStation reservationStations;	// reservation stations for MUL/DIV units.
+	private int exeStart; // when execution started so we can free unit when done (free unit upon exeStart+executionDelay)
 
 	
 	/**
@@ -29,7 +29,7 @@ public class MultUnit{
 
 	/**
 	 * Doing the actual calculation (what happens once a command enters a unit from the station)
-	 * and writing to CDB
+	 * and sending to CDB
 	 * @param stationNumber the line in the reservation station table that holds the to be executed instruction
 	 */
 	public void execute(int stationNumber) {
@@ -75,6 +75,10 @@ public class MultUnit{
 		
 	}
 	
+	/**
+	 * set unit to busy or not busy when it starts/ends a job
+	 * @param b true is setting to busy, false if setting to idle
+	 */
 	public void setBusy(boolean b) {
 		this.busy = b;
 		
@@ -83,7 +87,8 @@ public class MultUnit{
 
 
 	/**
-	 * attempt to accept new command into the reservation station, it there is room it succeeds
+	 * attempt to accept new command into the reservation station, it there is room it succeeds.<br>
+	 * Calls addInstruction method from ReservationStation class
 	 * @param inst the instruction we want to our station
 	 * @param thread the thread the instruction belongs to
 	 * @return True if successful, else false
@@ -121,8 +126,11 @@ public class MultUnit{
 
 
 
+	/**
+	 * get CC when this unit began execution of current commands
+	 * @return CC when this unit began execution of current commands
+	 */
 	public int getExeStart() {
-		// TODO Auto-generated method stub
 		return this.exeStart;
 	}
 

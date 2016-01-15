@@ -8,7 +8,9 @@ import support.Instruction;
 import support.Tag;
 /**
  * Reservation station class<br>
- * Also used to represent Load/Store buffers
+ * Also used to represent Load/Store buffers.
+ * Holds commands, the register values they need, the tags of those responsible to update said registers.
+ * The thread that is occupying the station. The opcode of the command in the station...
  * @author David
  *
  */
@@ -19,27 +21,28 @@ public class ReservationStation {
 	// tags representing which reservation station we want
 	public final static int ADD_REPOSITORY = 0; 
 	public final static int MUL_REPOSITORY = 1;
-	public final static int LOAD_REPOSITORY = 2;
-	public final static int STORE_REPOSITORY = 3;
+	public final static int LOAD_REPOSITORY = 2;	// for load buffers
+	public final static int STORE_REPOSITORY = 3;	// for store buffers
 	
 
 	private int size;
 	private Instruction[] instructions;
 	
-	int opCode[];
-	Float Vj[], Vk[];
-	Tag Qj[], Qk[];
-	int immediate[];
+	int opCode[];			// opcode of command in this station
+	Float Vj[], Vk[];		// register values for src0 and src1
+	Tag Qj[], Qk[];			// tags of those responsible for updating src0 and src1, null if regs are updated
+	int immediate[];		// Immediate value of the command
 	int thread[]; 			// which thread sent this instruction?
 	int acceptedWhen[]; 	// CC that this got into the station
 	private boolean inExecution[];	// did we already push this to unit? Don't want to push something twice..
-	int type;				// ADD/SUB station or MULT/DIV station?
+	int type;				// ADD/SUB station or MULT/DIV station or maybe STORE buffer or LOAD buffer?
 	
-	private int entryNumber = 0;
+	private int entryNumber = 0;	// not used in current version of project. Ignore.
 	
 	
 	/**
-	 * Constructor for a reservation station
+	 * Constructor for a reservation station.<br>
+	 * sets all attributes to initial values
 	 * @param size number of lines/spots in the station
 	 * @param type the type of station we want (what unit is this a station for?)
 	 */
@@ -163,7 +166,8 @@ public class ReservationStation {
 	}
 	
 	/**
-	 * Iterate over all lines in station, if one is empty return its location
+	 * Iterate over all lines in station, if one is empty return its location.<br>
+	 * Used to know where we can insert a new command.
 	 * @return location of empty line or -1 if station is full
 	 */
 	public int emptySpotIndex(){
@@ -179,10 +183,12 @@ public class ReservationStation {
 	 * gets the index of a command that is in the station and ready to be executed<br>
 	 * If there are several, choose the one with the smallest issue CC!!!<br>
 	 * Why? because for some reason I thought it was smart at the time. meh..
+	 * Chosen command will attempt to begin execution in the relevant unit
 	 * @return index of instruction that is ready to be executed, -1 if no such instruction exists
 	 */
 	public int isReadyIndex(){
 		
+		// all commands that are ready, from these we shall choose the oldest
 		ArrayList<Integer> temp = new ArrayList<>();
 			
 		

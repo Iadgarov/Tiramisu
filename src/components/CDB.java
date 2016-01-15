@@ -8,18 +8,21 @@ import support.Instruction;
 import support.Tag;
 
 /**
- * The CDB
+ * The CDB.<br>
+ * This class gets commands that have executed and broadcasts the result for others to see.<br>
+ * Broadcast happens once execution delay has passed. 
  * @author David
  *
  */
 public class CDB {
 
+	// lists of information on every command waiting to be broadcasted
 	static List<Integer> commitWhen = new ArrayList<>();	// is it time to commit this data yet?
 	static List<Tag> commitWho = new ArrayList<>();			// who needs to get this data?
-	static List<Float> commitWhat = new ArrayList<>();		// what is the data?
+	static List<Float> commitWhat = new ArrayList<>();		// what is the data we want to broadcast?
 	static List<Integer> commitWhere = new ArrayList<>(); 	// used to find location in memory for a store command
 	
-	private static int totalCommits = 0;	// how many instructions have commited so far
+	private static int totalCommits = 0;	// how many instructions have committed so far
 	
 	
 	/**
@@ -202,7 +205,7 @@ public class CDB {
 	
 	
 	/**
-	 * Update commands in the reservation stations/buffer with the data on the CDB
+	 * Update commands in the reservation stations/buffers with the data being broadcasted on the CDB
 	 * @param result	the data on the CDB
 	 * @param tag	who sent the data
 	 * @param station	type of station to update
@@ -245,7 +248,7 @@ public class CDB {
 	}
 		
 	/**
-	 * Update register from data on CDB
+	 * Update register from data being broadcasted on CDB
 	 * @param result	the data on the CDB
 	 * @param tag	who sent the data on the CDB
 	 */
@@ -293,11 +296,19 @@ public class CDB {
 	}
 
 
+	/**
+	 * get number of broadcasts and completed stores so far. Used to check if we are done.
+	 * @return number of broadcasts and completed stores so far
+	 */
 	public static int getTotalCommits() {
 		return totalCommits;
 	}
 
 
+	/**
+	 * Set total number of commits and stores completed so far for this program 
+	 * @param totalCommits total number of commits and stores completed so far for this program 
+	 */
 	public static void setTotalCommits(int totalCommits) {
 		CDB.totalCommits = totalCommits;
 	}

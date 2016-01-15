@@ -40,6 +40,7 @@ public class Sim {
 	private final static String LOAD_BUFF_AMOUNT 	= "mem_nr_load_buffers";
 	private final static String STORE_BUFF_AMOUNT	= "mem_nr_store_buffers";
 	
+	// parameters to hold values we read from cfg
 	private  static int addUnitAmount;
 	private  static int multUnitAmount;
 	private  static int addDelay;
@@ -50,8 +51,8 @@ public class Sim {
 	private  static int loadBuffAmount;
 	private  static int storeBuffAmount;
 	
-	private static ArrayList<Float> memory = new ArrayList<>();
-	static ArrayList<String> memoryInString = new ArrayList<>();	// used to save an instructions encoding for later
+	private static ArrayList<Float> memory = new ArrayList<>();		// the main memory in float form
+	static ArrayList<String> memoryInString = new ArrayList<>();	// the main memory in String form
 
 	/**
 	 * main, start everything here.

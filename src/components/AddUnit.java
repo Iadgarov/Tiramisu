@@ -4,21 +4,22 @@ import support.Instruction;
 import support.Tag;
 
 /**
- * Individual ADD/SUB unit class
+ * Individual ADD/SUB unit class.
+ * Processor can have several of these. They are responsible for ADD/SUB calculations. 
  * @author David
  *
  */
 public class AddUnit{
 	
-	private static int executionDelay;
+	private static int executionDelay;	
 	private boolean busy;
-	public static ReservationStation reservationStations;
-	private int exeStart; // when execution started so we can free unit when done
+	public static ReservationStation reservationStations;	// reservation stations that hold commands for this type of unit
+	private int exeStart; // when execution started so we can free unit when done (done = delay has passed since the start)
 
 	
 	/**
 	 * construct a ADD/SUB unit<br>
-	 * Gives each unit a "busy" array so we know what CC's it's working 
+	 * Gives each unit a boolean "busy"  so we know what CC's it's working. Sets it to false. 
 	 */
 	public AddUnit() {
 	
@@ -30,7 +31,7 @@ public class AddUnit{
 
 	/**
 	 * Doing the actual calculation (what happens once a command enters a unit from the station) 
-	 * and writing to CDB
+	 * and sending to CDB
 	 * @param stationNumber the line in the reservation station table that holds the to be executed instruction
 	 */
 	public void execute(int stationNumber) {
@@ -99,13 +100,19 @@ public class AddUnit{
 	}
 
 
-
+	/**
+	 * Get reservation stations for ADD/SUB unit
+	 * @return reservation stations object for ADD/SUB unit
+	 */
 	public static ReservationStation getReservationStations() {
 		return reservationStations;
 	}
 
 
-
+	/**
+	 * Set reservationStation object for ADD/SUB units.
+	 * @param reservationStations reservationStation object for ADD/SUB units.
+	 */
 	public static void setReservationStations(ReservationStation reservationStations) {
 		AddUnit.reservationStations = reservationStations;
 	}
@@ -123,19 +130,28 @@ public class AddUnit{
 	}
 
 
-
+	/**
+	 * Get's CC of when this unit began the current calculation.
+	 * @return CC of when this unit began the current calculation.
+	 */
 	public  int getExeStart() {
 		return exeStart;
 	}
 
 
-
+	/**
+	 * Set CC when this unit begins a calculation.
+	 * @param exeStart CC when this unit begins a calculation.
+	 */
 	public  void setExeStart(int exeStart) {
 		this.exeStart = exeStart;
 	}
 
 
-
+	/**
+	 * Set this unit to busy/not busy. When calculating busy = true, when idle busy = flase.
+	 * @param b boolean, is the unit busy now?
+	 */
 	public void setBusy(boolean b) {
 		this.busy = b;
 		

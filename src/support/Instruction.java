@@ -29,7 +29,7 @@ public class Instruction {
 	private int globalQLocation; // location in total command list
 	private int thread;		// which thread does it belong to
 	//private int currentExeCC; // how many CC's have we already spent in the execution?
-	private String dependentOn = "";
+	private String dependentOn = "";	// String of the instructions this one needs to wait for to complete
 	
 	/**
 	 * Takes command line string from memory array and converts it into an instruction.<br>

@@ -10,7 +10,9 @@ import components.ReservationStation;
 import support.Instruction;
 
 /**
- * Class for ADD/SUB unit collection belonging to the processor
+ * Class for ADD/SUB unit collection belonging to the processor.<br>
+ * Will hold a list of individual ADD/SUB calculation units. 
+ * 
  * @author David
  *
  *
@@ -18,14 +20,14 @@ import support.Instruction;
 public class Adders {
 
 	
-	private static List<AddUnit> addUnits;
+	private static List<AddUnit> addUnits;	// list of ADD/SUB units
 	public static int addUnitNumber;
 	private static int reservationStationNumber;
 
 	/**
 	 * Constructor for ADD/SUB unit collection<br>
 	 * Initiate unit amount and creates the unit objects<br>
-	 * Initiate reservtion station creation for ADD/SUB units<br>
+	 * Initiate reservation station creation for ADD/SUB units, same stations for all the units<br>
 	 * @param unitNumber	how many units?
 	 */
 	public Adders(int unitNumber){
@@ -45,7 +47,7 @@ public class Adders {
 	}
 	
 	/**
-	 * Go over all ADD/SUB units and return index of a free unit if it exists.<br>
+	 * Go over all ADD/SUB units and return index of a free ( = not currently calculating) unit if it exists.<br>
 	 * @return index of free ADD/SUB unit or -1 is all are busy
 	 */
 	public static int freeUnitIndex(){
@@ -60,7 +62,7 @@ public class Adders {
 	
 	/**
 	 * This method initializes all ADD/SUB units for the processor. <br>
-	 * Called by the constructor
+	 * Called by the constructor.
 	 * 
 	 * @param addUnitNumber	number of units to construct
 	 * @param addUnitDelay	number of cycles the units takes to finish execution
@@ -77,7 +79,8 @@ public class Adders {
 	}
 	
 	/**
-	 * construct reservation stations for all ADD/SUB units
+	 * construct reservation stations for all ADD/SUB units.
+	 * Calls the ReservationStation class constructor a number of times. 
 	 * @return	reservation stations Object of correct size for ADD/SUB unit
 	 */
 	static ReservationStation createStations() {
@@ -92,7 +95,7 @@ public class Adders {
 	/**
 	 * search reservation stations for commands that can begin execution<br>
 	 * search for available unit.<br>
-	 * If both found begin execution of the command in the unit
+	 * If both found begin execution of the command in the execution unit
 	 */
 	public static void attemptPushToUnit() {
 		
@@ -136,18 +139,34 @@ public class Adders {
 		return;
 	}
 
+	/**
+	 * Gets the number of reservation stations for ADD/SUB commands
+	 * @return the number of reservation stations for ADD/SUB commands
+	 */
 	public static int getReservationStationNumber() {
 		return reservationStationNumber;
 	}
 
+	/**
+	 * Sets the number of reservation stations for ADD/SUB commands
+	 * @param reservationStationNumber number of reservation stations for ADD/SUB commands
+	 */
 	public static void setReservationStationNumber(int reservationStationNumber) {
 		Adders.reservationStationNumber = reservationStationNumber;
 	}
-
+	
+	/**
+	 * Gets the list of ADD/SUB execution units
+	 * @return the list of ADD/SUB execution units
+	 */
 	public static List<AddUnit> getAddUnits() {
 		return addUnits;
 	}
 
+	/**
+	 * Sets the list of ADD/SUB units for our processor. A list of objects of the class AddUnit.
+	 * @param addUnits A list of objects of the class AddUnit.
+	 */
 	public static void setAddUnits(List<AddUnit> addUnits) {
 		Adders.addUnits = addUnits;
 	}

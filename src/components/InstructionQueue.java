@@ -32,15 +32,16 @@ public class InstructionQueue {
 	private static boolean halt0 = false;	// has the first halt been reached?
 	private static boolean halt1 = false;	// has the second halt been reached?
 	
-	private static int instCount_0 = 0;
-	private static int instCount_1 = 0;
+	private static int instCount_0 = 0;	// number of instructions in thread 0
+	private static int instCount_1 = 0;	// number of instructions in thread 1
 	
 	// how many instructions we've issued from each queue this CC
+	// used to make sure we do not issue more than 2 from each thread per CC
 	private static int issueCountPerCC_0 = 0;
 	static int issueCountPerCC_1 = 0;
 	
 	/**
-	 * Instruction constructor
+	 * InstructionQueue constructor. 
 	 * @param one	first instruction queue that main sent us, for thread 0
 	 * @param two	second instruction queue that main sent us, for thread 1
 	 */
@@ -53,7 +54,7 @@ public class InstructionQueue {
 	}
 
 	/**
-	 * 
+	 * Checks if there are any instructions left to be executed in the queues
 	 * @return True if both threads have finished all their instructions
 	 */
 	public boolean isEmpty(){
@@ -244,6 +245,10 @@ public class InstructionQueue {
 		InstructionQueue.totalIssues = totalIssues;
 	}
 
+	/**
+	 * have we reached HALT in thread 0
+	 * @return true if we reached HALT in thread 0, else false
+	 */
 	public static boolean isHalt0() {
 		return halt0;
 	}
@@ -252,6 +257,10 @@ public class InstructionQueue {
 		InstructionQueue.halt0 = halt0;
 	}
 
+	/**
+	 * have we reached HALT in thread 1
+	 * @return true if we reached HALT in thread 1, else false
+	 */
 	public static boolean isHalt1() {
 		return halt1;
 	}

@@ -45,7 +45,8 @@ public class Processor {
 	public static ArrayList<Float> memory;
 
 	/**
-	 * Constructor for processor class
+	 * Constructor for processor class. 
+	 * This is a glorified constant holder
 	 * @param instructionQ_0	Instructions for first thread
 	 * @param instructionQ_1	Instructions for second thread
 	 * @param addUnitNumber		Number of ADD/SUB units

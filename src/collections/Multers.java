@@ -16,15 +16,16 @@ import support.Instruction;
  */
 public class Multers {
 
-	private static List<MultUnit> multUnits;
+	private static List<MultUnit> multUnits;	// list of MULT/DIV execution units
 	public static int multUnitNumber;
 	private static int reservationStationNumber;
 
 	/**
+	 * Class constructor<br>
 	 * Set MULT/DIV unit amount<br>
 	 * Construct the list of MULT/DIV units. <br>
 	 * initiate reservation station construction for units<br>
-	 * @param multUnitNumber	number of said units
+	 * @param multUnitNumber	number of MULT/DIV units
 	 */
 	public Multers(int multUnitNumber){
 		
@@ -35,7 +36,8 @@ public class Multers {
 	}
 	
 	/**
-	 * construct reservation stations for all MUL/DIV units
+	 * construct reservation stations for all MUL/DIV units, same stations for all units.<br>
+	 * Calls ReservationStation class constructor a number of times. 
 	 * @return list of reservation stations for MUL/DIV unit
 	 */
 	private ReservationStation createStations() {
@@ -46,7 +48,8 @@ public class Multers {
 	
 	
 	/**
-	 * Checks if all MULT/DIV units are busy
+	 * Checks if all MULT/DIV units are busy<br>
+	 * Uses freeUnitIndex method to do so (compares its result to -1)<br>
 	 * @return true if all units are busy
 	 */
 	public boolean isFullyBusy(){
@@ -115,7 +118,7 @@ public class Multers {
 	
 	/**
 	 * This method initializes all the MUL/DIV units for the processor. 
-	 * 
+	 * Calls MultUnit constructor a number of times. 
 	 * @param multUnitNumber	number of units to construct
 	 * @param multUnitDelay		number of cycles it takes for this unit to complete execution
 	 * @return	ArrayList of MUL/DIV units
@@ -131,18 +134,34 @@ public class Multers {
 		return returnMe;
 	}
 
+	/**
+	 * Get's amount of reservation stations for MULT/DIV execution units
+	 * @return amount of reservation stations for MULT/DIV execution units
+	 */
 	public static int getReservationStationNumber() {
 		return reservationStationNumber;
 	}
 
+	/**
+	 * amount of reservation stations for MULT/DIV execution units
+	 * @param reservationStationNumber number of reservation stations for MULT/DIV units
+	 */
 	public static void setReservationStationNumber(int reservationStationNumber) {
 		Multers.reservationStationNumber = reservationStationNumber;
 	}
 
+	/**
+	 * gets list of all MULT/DIV execution units
+	 * @return list of all MULT/DIV execution units
+	 */
 	public static List<MultUnit> getMultUnits() {
 		return multUnits;
 	}
 
+	/**
+	 * Set list of MULT/DIV execution units
+	 * @param multUnits list of MULT/DIV execution units
+	 */
 	public static void setMultUnits(List<MultUnit> multUnits) {
 		Multers.multUnits = multUnits;
 	}
